@@ -1,0 +1,91 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-08-31T13:08:00Z",
+  "window_specification": {
+    "window_size_seconds": 60,
+    "step_size_seconds": 30,
+    "overlap_percentage": 50.0,
+    "min_valid_samples_percentage": 70.0
+  },
+  "modality_architecture": {
+    "zero_synthetic_imputation_policy": "STRICT. Under no circumstances are missing modalities or sensor dropouts filled with constant physiological defaults (e.g. 0.0, 75.0 bpm, or 15.0 breaths/min). Missing telemetry is encoded as explicit NaN.",
+    "modality_flags": [
+      {
+        "name": "has_wrist_modality",
+        "type": "binary",
+        "description": "1 if wrist photoplethysmography, electrodermal, skin temperature, and accelerometry streams were present; 0 otherwise."
+      },
+      {
+        "name": "has_chest_modality",
+        "type": "binary",
+        "description": "1 if chest respiration expansion band and trapezius EMG streams were present; 0 otherwise."
+      }
+    ],
+    "evaluation_tracks": {
+      "track_1_wrist_common_core": {
+        "description": "Primary evaluation track containing 25 physiological and kinetic features genuinely and natively present across all public datasets (WESAD wrist, PhysioNet wrist, CATSA wrist). Used for all cross-dataset model training and benchmark evaluations.",
+        "features_count": 25,
+        "partitions": ["train_features.csv", "val_features.csv", "test_internal_features.csv", "test_external_catsa_features.csv"]
+      },
+      "track_2_multimodal_chest_enabled": {
+        "description": "Secondary multimodal evaluation track containing 28 features (25 wrist core + 3 chest-specific features: chest_resp_rate, chest_resp_std, chest_emg_mean). Evaluated exclusively on chest-instrumented cohorts without cross-dataset contamination.",
+        "features_count": 28,
+        "partitions": ["wesad_multimodal_chest_features.csv"]
+      }
+    }
+  },
+  "target_specification": {
+    "target_name": "is_physiological_stress",
+    "type": "binary",
+    "classes": {
+      "0": {
+        "name": "NON_STRESS",
+        "description": "Source protocol state is not the target acute-stress condition (baseline, neutral rest, amusement, meditation, or physical exertion); does NOT imply absence of all psychological distress."
+      },
+      "1": {
+        "name": "ACUTE_STRESS",
+        "description": "Acute cognitive, social-evaluative, or psychological stress state (TSST, Stroop, mental arithmetic, high-distress self-reports)."
+      }
+    }
+  },
+  "feature_groups": {
+    "A_wrist_physiological_core": {
+      "description": "25 features extracted from wrist wearable sensors (BVP/PPG, EDA, Temp, ACC) natively present across all datasets",
+      "features": [
+        {"name": "hr_mean", "unit": "bpm", "source_datasets": ["WESAD (wrist)", "PhysioNet (wrist)", "CATSA (wrist)"], "missing_representation": "NaN if optical PPG signal detached / corrupted", "used_in_initial_model": true},
+        {"name": "hr_std", "unit": "bpm", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if signal absent", "used_in_initial_model": true},
+        {"name": "hr_min", "unit": "bpm", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if signal absent", "used_in_initial_model": true},
+        {"name": "hr_max", "unit": "bpm", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if signal absent", "used_in_initial_model": true},
+        {"name": "hr_slope", "unit": "bpm/s", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if signal absent", "used_in_initial_model": true},
+        {"name": "hrv_rmssd", "unit": "ms", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if <2 valid beats detected in window (e.g. high motion artifact)", "used_in_initial_model": true},
+        {"name": "hrv_sdnn", "unit": "ms", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if <2 valid beats detected", "used_in_initial_model": true},
+        {"name": "hrv_pnn50", "unit": "%", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if <2 valid beats detected", "used_in_initial_model": true},
+        {"name": "hrv_cv", "unit": "%", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if <2 valid beats detected", "used_in_initial_model": true},
+        {"name": "eda_mean", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected (<0.005 uS)", "used_in_initial_model": true},
+        {"name": "eda_std", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_min", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_max", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_slope", "unit": "uS/s", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_tonic_mean", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_phasic_peaks", "unit": "count", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_phasic_max_amplitude", "unit": "uS", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "eda_phasic_auc", "unit": "uS*s", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if electrode disconnected", "used_in_initial_model": true},
+        {"name": "temp_mean", "unit": "degC", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if thermal sensor out of range (<20 or >45 degC)", "used_in_initial_model": true},
+        {"name": "temp_std", "unit": "degC", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if thermal sensor out of range", "used_in_initial_model": true},
+        {"name": "temp_slope", "unit": "degC/s", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if thermal sensor out of range", "used_in_initial_model": true},
+        {"name": "acc_magnitude_mean", "unit": "g", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if accelerometer disconnected", "used_in_initial_model": true},
+        {"name": "acc_magnitude_std", "unit": "g", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if accelerometer disconnected", "used_in_initial_model": true},
+        {"name": "acc_motion_energy", "unit": "g^2", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if accelerometer disconnected", "used_in_initial_model": true},
+        {"name": "acc_peak_acceleration", "unit": "g", "source_datasets": ["WESAD", "PhysioNet", "CATSA"], "missing_representation": "NaN if accelerometer disconnected", "used_in_initial_model": true}
+      ]
+    },
+    "B_chest_multimodal_features": {
+      "description": "3 features extracted from chest band sensors (Resp expansion, EMG) present ONLY in WESAD chest modality",
+      "features": [
+        {"name": "chest_resp_rate", "unit": "breaths/min", "source_datasets": ["WESAD (chest only)"], "missing_representation": "Absent from wrist datasets; NaN in multimodal tables if chest sensor disconnected; has_chest_modality=0 flag", "used_in_initial_model": false},
+        {"name": "chest_resp_std", "unit": "a.u.", "source_datasets": ["WESAD (chest only)"], "missing_representation": "Absent from wrist datasets; NaN in multimodal tables if chest sensor disconnected; has_chest_modality=0 flag", "used_in_initial_model": false},
+        {"name": "chest_emg_mean", "unit": "mV RMS", "source_datasets": ["WESAD (chest only)"], "missing_representation": "Absent from wrist datasets; NaN in multimodal tables if chest sensor disconnected; has_chest_modality=0 flag", "used_in_initial_model": false}
+      ]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: septeria_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-septeria_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-septeria_dev_pass_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-septeria_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-septeria_admin} -d ${POSTGRES_DB:-septeria_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: septeria_backend
+    restart: always
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-septeria_admin}:${POSTGRES_PASSWORD:-septeria_dev_pass_2026}@postgres:5432/${POSTGRES_DB:-septeria_db}
+      JWT_SECRET: ${JWT_SECRET:-septeria_ultra_secret_key_sih2026_dev_mode}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:8000,http://127.0.0.1:3000,http://127.0.0.1:8000}
+      PYTHONPATH: /app
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend:ro
+      - ./database:/app/database:ro
+      - ./shared:/app/shared:ro
+
+  authority-web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.authority-web
+    container_name: septeria_authority_web
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

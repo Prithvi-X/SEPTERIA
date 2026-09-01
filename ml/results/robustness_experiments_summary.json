@@ -1,0 +1,305 @@
+{
+  "Model A: Physiological-Only": {
+    "features_count": 25,
+    "validation_metrics": {
+      "accuracy": 0.8237,
+      "balanced_accuracy": 0.8047,
+      "precision": 0.9086,
+      "recall_sensitivity": 0.6603,
+      "specificity": 0.9491,
+      "f1_score": 0.7648,
+      "roc_auc": 0.9136,
+      "pr_auc": 0.8953,
+      "brier_score": 0.131,
+      "ece": 0.1001,
+      "confusion_matrix": {
+        "tn": 652,
+        "fp": 35,
+        "fn": 179,
+        "tp": 348
+      }
+    },
+    "internal_test_metrics": {
+      "accuracy": 0.826,
+      "balanced_accuracy": 0.8211,
+      "precision": 0.8689,
+      "recall_sensitivity": 0.7412,
+      "specificity": 0.901,
+      "f1_score": 0.8,
+      "roc_auc": 0.8888,
+      "pr_auc": 0.8806,
+      "brier_score": 0.1306,
+      "ece": 0.0622,
+      "confusion_matrix": {
+        "tn": 464,
+        "fp": 51,
+        "fn": 118,
+        "tp": 338
+      }
+    },
+    "catsa_benchmark": {
+      "Baseline": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8515,
+        "median_p_stress": 0.8967,
+        "high_stress_pct": 96.8
+      },
+      "Logic": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8194,
+        "median_p_stress": 0.8705,
+        "high_stress_pct": 95.6
+      },
+      "Nback": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8123,
+        "median_p_stress": 0.8828,
+        "high_stress_pct": 91.2
+      },
+      "Stroop": {
+        "windows_count": 250,
+        "mean_p_stress": 0.7623,
+        "median_p_stress": 0.8509,
+        "high_stress_pct": 86.8
+      },
+      "Sudoku": {
+        "windows_count": 244,
+        "mean_p_stress": 0.8256,
+        "median_p_stress": 0.8865,
+        "high_stress_pct": 94.26
+      }
+    },
+    "top_features_by_gain": [
+      {
+        "feature": "hrv_sdnn",
+        "gain": 85.39
+      },
+      {
+        "feature": "acc_magnitude_std",
+        "gain": 57.3
+      },
+      {
+        "feature": "acc_motion_energy",
+        "gain": 53.17
+      },
+      {
+        "feature": "hr_max",
+        "gain": 41.61
+      },
+      {
+        "feature": "hrv_cv",
+        "gain": 29.12
+      },
+      {
+        "feature": "hr_std",
+        "gain": 28.41
+      },
+      {
+        "feature": "hr_min",
+        "gain": 25.75
+      }
+    ]
+  },
+  "Model B: Physiological + Personal Baseline": {
+    "features_count": 32,
+    "validation_metrics": {
+      "accuracy": 0.8311,
+      "balanced_accuracy": 0.8152,
+      "precision": 0.8927,
+      "recall_sensitivity": 0.6945,
+      "specificity": 0.936,
+      "f1_score": 0.7812,
+      "roc_auc": 0.9406,
+      "pr_auc": 0.9178,
+      "brier_score": 0.1101,
+      "ece": 0.0905,
+      "confusion_matrix": {
+        "tn": 643,
+        "fp": 44,
+        "fn": 161,
+        "tp": 366
+      }
+    },
+    "internal_test_metrics": {
+      "accuracy": 0.8126,
+      "balanced_accuracy": 0.8065,
+      "precision": 0.8703,
+      "recall_sensitivity": 0.7061,
+      "specificity": 0.9068,
+      "f1_score": 0.7797,
+      "roc_auc": 0.9144,
+      "pr_auc": 0.8983,
+      "brier_score": 0.129,
+      "ece": 0.0804,
+      "confusion_matrix": {
+        "tn": 467,
+        "fp": 48,
+        "fn": 134,
+        "tp": 322
+      }
+    },
+    "catsa_benchmark": {
+      "Baseline": {
+        "windows_count": 250,
+        "mean_p_stress": 0.826,
+        "median_p_stress": 0.868,
+        "high_stress_pct": 98.0
+      },
+      "Logic": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8342,
+        "median_p_stress": 0.8882,
+        "high_stress_pct": 94.4
+      },
+      "Nback": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8229,
+        "median_p_stress": 0.8918,
+        "high_stress_pct": 92.0
+      },
+      "Stroop": {
+        "windows_count": 250,
+        "mean_p_stress": 0.7884,
+        "median_p_stress": 0.8786,
+        "high_stress_pct": 90.4
+      },
+      "Sudoku": {
+        "windows_count": 244,
+        "mean_p_stress": 0.8384,
+        "median_p_stress": 0.8924,
+        "high_stress_pct": 94.67
+      }
+    },
+    "top_features_by_gain": [
+      {
+        "feature": "hrv_sdnn",
+        "gain": 106.66
+      },
+      {
+        "feature": "acc_motion_energy",
+        "gain": 75.61
+      },
+      {
+        "feature": "acc_magnitude_std",
+        "gain": 73.94
+      },
+      {
+        "feature": "hr_max",
+        "gain": 58.66
+      },
+      {
+        "feature": "dev_hrv_rmssd_abs",
+        "gain": 37.13
+      },
+      {
+        "feature": "hr_std",
+        "gain": 34.52
+      },
+      {
+        "feature": "hr_min",
+        "gain": 29.62
+      }
+    ]
+  },
+  "Model C: Full SEPTERIA Fusion (Physio + Baseline + Context)": {
+    "features_count": 38,
+    "validation_metrics": {
+      "accuracy": 0.8311,
+      "balanced_accuracy": 0.8166,
+      "precision": 0.8815,
+      "recall_sensitivity": 0.7059,
+      "specificity": 0.9272,
+      "f1_score": 0.784,
+      "roc_auc": 0.9376,
+      "pr_auc": 0.9154,
+      "brier_score": 0.1119,
+      "ece": 0.0873,
+      "confusion_matrix": {
+        "tn": 637,
+        "fp": 50,
+        "fn": 155,
+        "tp": 372
+      }
+    },
+    "internal_test_metrics": {
+      "accuracy": 0.8187,
+      "balanced_accuracy": 0.8127,
+      "precision": 0.8784,
+      "recall_sensitivity": 0.7127,
+      "specificity": 0.9126,
+      "f1_score": 0.7869,
+      "roc_auc": 0.9252,
+      "pr_auc": 0.9077,
+      "brier_score": 0.1232,
+      "ece": 0.0835,
+      "confusion_matrix": {
+        "tn": 470,
+        "fp": 45,
+        "fn": 131,
+        "tp": 325
+      }
+    },
+    "catsa_benchmark": {
+      "Baseline": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8163,
+        "median_p_stress": 0.854,
+        "high_stress_pct": 96.8
+      },
+      "Logic": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8331,
+        "median_p_stress": 0.8837,
+        "high_stress_pct": 95.6
+      },
+      "Nback": {
+        "windows_count": 250,
+        "mean_p_stress": 0.8259,
+        "median_p_stress": 0.8903,
+        "high_stress_pct": 92.4
+      },
+      "Stroop": {
+        "windows_count": 250,
+        "mean_p_stress": 0.7904,
+        "median_p_stress": 0.8736,
+        "high_stress_pct": 88.4
+      },
+      "Sudoku": {
+        "windows_count": 244,
+        "mean_p_stress": 0.8408,
+        "median_p_stress": 0.8855,
+        "high_stress_pct": 94.67
+      }
+    },
+    "top_features_by_gain": [
+      {
+        "feature": "hrv_sdnn",
+        "gain": 91.71
+      },
+      {
+        "feature": "acc_magnitude_std",
+        "gain": 78.64
+      },
+      {
+        "feature": "acc_motion_energy",
+        "gain": 68.41
+      },
+      {
+        "feature": "hr_max",
+        "gain": 53.19
+      },
+      {
+        "feature": "hr_std",
+        "gain": 44.36
+      },
+      {
+        "feature": "dev_hrv_rmssd_abs",
+        "gain": 35.17
+      },
+      {
+        "feature": "hrv_rmssd",
+        "gain": 31.23
+      }
+    ]
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "manifest_version": "1.0.0",
+  "created_at": "2026-08-31T12:05:00Z",
+  "datasets": {
+    "WESAD": {
+      "dataset_name": "WESAD (Wearable Stress and Affect Detection)",
+      "local_path": "Dataset/archive/WESAD",
+      "total_subjects": 15,
+      "subject_ids": [
+        "S10",
+        "S11",
+        "S13",
+        "S14",
+        "S15",
+        "S16",
+        "S17",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9"
+      ],
+      "hardware_devices": {
+        "chest": "RespiBAN Professional (Chest unit)",
+        "wrist": "Empatica E4 (Wristband)"
+      },
+      "signals": {
+        "chest": {
+          "ACC": {
+            "sampling_rate_hz": 700,
+            "units": "g",
+            "channels": 3,
+            "description": "3-axis chest acceleration"
+          },
+          "ECG": {
+            "sampling_rate_hz": 700,
+            "units": "mV",
+            "channels": 1,
+            "description": "Electrocardiogram lead"
+          },
+          "EMG": {
+            "sampling_rate_hz": 700,
+            "units": "mV",
+            "channels": 1,
+            "description": "Electromyogram (trapezius muscle)"
+          },
+          "EDA": {
+            "sampling_rate_hz": 700,
+            "units": "uS",
+            "channels": 1,
+            "description": "Electrodermal activity"
+          },
+          "Temp": {
+            "sampling_rate_hz": 700,
+            "units": "deg_C",
+            "channels": 1,
+            "description": "Skin temperature"
+          },
+          "Resp": {
+            "sampling_rate_hz": 700,
+            "units": "% (respiratory expansion)",
+            "channels": 1,
+            "description": "Respiration chest expansion"
+          }
+        },
+        "wrist": {
+          "ACC": {
+            "sampling_rate_hz": 32,
+            "units": "1/64g",
+            "channels": 3,
+            "description": "3-axis wrist acceleration"
+          },
+          "BVP": {
+            "sampling_rate_hz": 64,
+            "units": "PPG amplitude",
+            "channels": 1,
+            "description": "Blood volume pulse"
+          },
+          "EDA": {
+            "sampling_rate_hz": 4,
+            "units": "uS",
+            "channels": 1,
+            "description": "Electrodermal activity"
+          },
+          "TEMP": {
+            "sampling_rate_hz": 4,
+            "units": "deg_C",
+            "channels": 1,
+            "description": "Skin temperature"
+          }
+        }
+      },
+      "labels": {
+        "sampling_rate_hz": 700,
+        "classes": {
+          "0": "Transient / Non-study activity",
+          "1": "Baseline (Neutral reading / resting)",
+          "2": "Stress (Trier Social Stress Test: Public Speaking + Mental Arithmetic)",
+          "3": "Amusement (Funny video clips)",
+          "4": "Meditation (Guided relaxation / de-escalation)",
+          "5": "Ignored / Other",
+          "6": "Ignored / Other",
+          "7": "Ignored / Other"
+        },
+        "self_reports": [
+          "PANAS (Positive and Negative Affect Schedule)",
+          "STAI (State-Trait Anxiety Inventory)",
+          "SAM (Self-Assessment Manikins)"
+        ]
+      },
+      "file_formats": [
+        ".pkl",
+        ".csv",
+        ".txt",
+        ".pdf"
+      ],
+      "primary_files_for_ml": [
+        "archive/WESAD/S10/S10.pkl",
+        "archive/WESAD/S11/S11.pkl",
+        "archive/WESAD/S13/S13.pkl",
+        "archive/WESAD/S14/S14.pkl",
+        "archive/WESAD/S15/S15.pkl",
+        "archive/WESAD/S16/S16.pkl",
+        "archive/WESAD/S17/S17.pkl",
+        "archive/WESAD/S2/S2.pkl",
+        "archive/WESAD/S3/S3.pkl",
+        "archive/WESAD/S4/S4.pkl",
+        "archive/WESAD/S5/S5.pkl",
+        "archive/WESAD/S6/S6.pkl",
+        "archive/WESAD/S7/S7.pkl",
+        "archive/WESAD/S8/S8.pkl",
+        "archive/WESAD/S9/S9.pkl"
+      ],
+      "secondary_files": [
+        "archive/WESAD/S10/S10_quest.csv",
+        "archive/WESAD/S11/S11_quest.csv",
+        "archive/WESAD/S13/S13_quest.csv",
+        "archive/WESAD/S14/S14_quest.csv",
+        "archive/WESAD/S15/S15_quest.csv",
+        "archive/WESAD/S16/S16_quest.csv",
+        "archive/WESAD/S17/S17_quest.csv",
+        "archive/WESAD/S2/S2_quest.csv",
+        "archive/WESAD/S3/S3_quest.csv",
+        "archive/WESAD/S4/S4_quest.csv",
+        "archive/WESAD/S5/S5_quest.csv",
+        "archive/WESAD/S6/S6_quest.csv",
+        "archive/WESAD/S7/S7_quest.csv",
+        "archive/WESAD/S8/S8_quest.csv",
+        "archive/WESAD/S9/S9_quest.csv"
+      ],
+      "missing_data_notes": "S1 is pilot; S12 omitted due to RespiBAN sensor malfunction; no NaNs in remaining 15 subject pickle files.",
+      "license_notes": "Academic Research Use (Schmidt et al., ACM UBICOMP 2018)",
+      "suitability": {
+        "stress_classification": "Primary public dataset for initial multimodal stress modelling (chest and wrist telemetry during TSST vs baseline/meditation).",
+        "physical_exertion_distinction": "MODERATE (Includes amusement and baseline, but no high-intensity aerobic exercise protocol)",
+        "longitudinal_testing": "LOW (Single session lab study ~1.5 to 2 hours per subject)"
+      },
+      "recommended_role": "PRIMARY_TRAINING"
+    },
+    "PhysioNet_Stress_Exercise": {
+      "dataset_name": "Wearable Device Dataset from Induced Stress and Structured Exercise Sessions (PhysioNet v1.0.1)",
+      "local_path": "Dataset/wearable-device-dataset-from-induced-stress-and-structured-exercise-sessions-1.0.1/wearable-device-dataset-from-induced-stress-and-structured-exercise-sessions-1.0.1",
+      "total_unique_participants": 36,
+      "participant_breakdown": {
+        "males_stage1": 18,
+        "females_stage2": 18,
+        "total": 36
+      },
+      "protocols": {
+        "STRESS": {
+          "sessions": 37,
+          "description": "Trier Mental Challenge Task (TMCT), Stroop, Real Opinion, Opposite Opinion, Subtraction arithmetic"
+        },
+        "AEROBIC": {
+          "sessions": 31,
+          "description": "Stationary cycle ergometer aerobic exercise with stepped RPM increments (60 to 110 RPM)"
+        },
+        "ANAEROBIC": {
+          "sessions": 32,
+          "description": "Wingate-style high-intensity anaerobic sprint bouts"
+        }
+      },
+      "hardware_device": "Empatica E4 Wristband",
+      "signals": {
+        "ACC": {
+          "sampling_rate_hz": 32,
+          "units": "1/64g",
+          "channels": 3,
+          "description": "3-axis wrist acceleration"
+        },
+        "BVP": {
+          "sampling_rate_hz": 64,
+          "units": "PPG amplitude",
+          "channels": 1,
+          "description": "Blood volume pulse"
+        },
+        "EDA": {
+          "sampling_rate_hz": 4,
+          "units": "uS",
+          "channels": 1,
+          "description": "Electrodermal activity"
+        },
+        "TEMP": {
+          "sampling_rate_hz": 4,
+          "units": "deg_C",
+          "channels": 1,
+          "description": "Skin temperature"
+        },
+        "HR": {
+          "sampling_rate_hz": 1,
+          "units": "bpm",
+          "channels": 1,
+          "description": "Derived heart rate from E4 proprietary algorithm"
+        },
+        "IBI": {
+          "sampling_rate_hz": "Event-based",
+          "units": "seconds",
+          "channels": 2,
+          "description": "Inter-beat interval timestamp and duration"
+        }
+      },
+      "labels": {
+        "task_events": "tags.csv in each subject folder marking protocol transitions",
+        "continuous_self_reports": "Stress_Level_v1.csv, Stress_Level_v2.csv (Self-reported stress ratings 0-10 across baseline, tasks, rest)"
+      },
+      "file_formats": [
+        ".csv",
+        ".txt",
+        ".ipynb"
+      ],
+      "missing_data_notes": "Documented in data_constraints.txt (S02 duplicated E4 download; f07 dock covered PPG/TEMP; f14/S11/S16 bluetooth connection drop split into a/b; S01 anaerobic IBI empty; S03/S07 early aerobic stop; S12 skipped aerobic).",
+      "license_notes": "Open Data Commons Attribution License (ODC-By v1.0) / PhysioNet",
+      "suitability": {
+        "stress_classification": "EXCELLENT (Cognitive and social stress sessions with self-reported ratings)",
+        "physical_exertion_distinction": "OUTSTANDING / CRUCIAL (Contains matching wearable telemetry during pure aerobic and anaerobic exercise)",
+        "longitudinal_testing": "LOW-MODERATE (Multi-protocol laboratory sessions)"
+      },
+      "recommended_role": "SECONDARY_TRAINING_AND_EXERTION_DISCRIMINATION"
+    },
+    "CATSA": {
+      "dataset_name": "CATSA (Cognitive and Affective Time-Series Analysis Dataset)",
+      "local_path": "Dataset/CATSA/CATSA",
+      "total_subjects": 50,
+      "subject_ids": [
+        "Sub1",
+        "Sub10",
+        "Sub11",
+        "Sub12",
+        "Sub13",
+        "Sub14",
+        "Sub15",
+        "Sub16",
+        "Sub17",
+        "Sub18",
+        "Sub2",
+        "Sub20",
+        "Sub21",
+        "Sub22",
+        "Sub23",
+        "Sub24",
+        "Sub26",
+        "Sub27",
+        "Sub28",
+        "Sub29",
+        "Sub3",
+        "Sub30",
+        "Sub31",
+        "Sub32",
+        "Sub33",
+        "Sub34",
+        "Sub35",
+        "Sub36",
+        "Sub37",
+        "Sub38",
+        "Sub4",
+        "Sub40",
+        "Sub41",
+        "Sub42",
+        "Sub43",
+        "Sub44",
+        "Sub45",
+        "Sub46",
+        "Sub47",
+        "Sub48",
+        "Sub49",
+        "Sub5",
+        "Sub50",
+        "Sub51",
+        "Sub52",
+        "Sub53",
+        "Sub6",
+        "Sub7",
+        "Sub8",
+        "Sub9"
+      ],
+      "tasks_per_subject": [
+        "Baseline",
+        "Logic",
+        "Nback",
+        "Stroop",
+        "Sudoku"
+      ],
+      "duration_per_task_seconds": 180,
+      "hardware_device": "Empatica E4 Wristband",
+      "signals": {
+        "ACC": {
+          "sampling_rate_hz": 32,
+          "units": "1/64g",
+          "channels": 3,
+          "rows_per_task": 5760
+        },
+        "BVP": {
+          "sampling_rate_hz": 64,
+          "units": "PPG amplitude",
+          "channels": 1,
+          "rows_per_task": 11520
+        },
+        "EDA": {
+          "sampling_rate_hz": 4,
+          "units": "uS",
+          "channels": 1,
+          "rows_per_task": 720
+        },
+        "TEMP": {
+          "sampling_rate_hz": 4,
+          "units": "deg_C",
+          "channels": 1,
+          "rows_per_task": 720
+        },
+        "HR": {
+          "sampling_rate_hz": 1,
+          "units": "bpm",
+          "channels": 1,
+          "rows_per_task": 180
+        }
+      },
+      "labels": {
+        "task_condition_folders": "Task/condition labels that can support external stress-related evaluation: 5 conditions: Baseline (0/Neutral), Logic (Cognitive Stress), Nback (Working Memory Load), Stroop (Attention Conflict Stress), Sudoku (Mental Arithmetic Stress)",
+        "total_task_sessions": 250
+      },
+      "file_formats": [
+        ".csv",
+        ".pdf"
+      ],
+      "missing_data_notes": "Extremely clean, uniform 180s blocks across all 50 participants; zero missing values in CSVs.",
+      "license_notes": "Academic / Open Research",
+      "suitability": {
+        "stress_classification": "Task/condition labels that can support external stress-related evaluation across 50 distinct human subjects performing 4 cognitive stress tasks vs baseline.",
+        "physical_exertion_distinction": "LOW (Cognitive/mental tasks only, no high-intensity physical exertion)",
+        "longitudinal_testing": "MODERATE (50 subjects allows strong cross-subject out-of-fold generalization testing)"
+      },
+      "recommended_role": "EXTERNAL_VALIDATION_AND_GENERALIZATION"
+    },
+    "TILES_2018": {
+      "dataset_name": "TILES-2018 (Tracking Individual Performance with Sensors in Hospital Workers)",
+      "local_path": "Dataset/tiles-dataset-release-master/tiles-dataset-release-master",
+      "contents_type": "Codebase / Preprocessing Pipeline Repository (Raw multi-week telemetry hosted externally via DUA at tiles-data.isi.edu)",
+      "repository_components": [
+        "src/curation (Ingestion and de-identification scripts)",
+        "src/feature_processing (Fitbit, OMSignal smart garment, and OwlinOne audio/beacon feature extraction scripts)",
+        "src/survey_scoring (Daily survey and baseline IGTB psychological battery scoring scripts)",
+        "paper/data (Metadata summaries and publication plot CSVs)"
+      ],
+      "license_notes": "GNU Lesser General Public License (LGPL v3.0)",
+      "suitability": {
+        "stress_classification": "NOT USABLE LOCALLY (Raw time-series sensor streams are not stored in this repository)",
+        "physical_exertion_distinction": "NOT USABLE LOCALLY",
+        "longitudinal_testing": "NOT USABLE LOCALLY (Feature extraction logic can inform our pipeline design)"
+      },
+      "recommended_role": "DO_NOT_USE_AS_TRAINING_DATA (Reference for longitudinal feature extraction architecture only)"
+    },
+    "datacommons_uchistorical": {
+      "dataset_name": "UN Peacekeeping Historical Personnel Dataset",
+      "local_path": "Dataset/datacommons-uchistorical.csv",
+      "contents_type": "Macro-level country peacekeeping troop contribution statistics (2010-2020)",
+      "suitability": {
+        "stress_classification": "NOT APPLICABLE / UNRELATED",
+        "physical_exertion_distinction": "NOT APPLICABLE / UNRELATED",
+        "longitudinal_testing": "NOT APPLICABLE / UNRELATED"
+      },
+      "recommended_role": "DO_NOT_USE (Unrelated macro-statistical file)"
+    }
+  }
+}

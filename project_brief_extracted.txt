@@ -1,0 +1,476 @@
+SEPTERIA | SIH26186
+
+Antigravity Project Brief & Build Contract
+
+Single source of truth for building the Round 4 working prototype
+
+Prepared for the SEPTERIA team | Prototype deadline: 2 September 2026, 10:00 AM
+
+1. PURPOSE OF THIS DOCUMENT
+
+This document is the implementation brief to give Antigravity before Phase 1. It defines what SEPTERIA is, who it serves, what must be genuinely working for Round 4, what may use synthetic/mock data, the approved technology stack, system boundaries, privacy rules, and the target demo scenario. Antigravity must treat this document as a build contract and must not silently expand or replace the agreed scope.
+
+2. OFFICIAL SIH26186 SCOPE
+
+Problem Statement ID: SIH26186
+
+Title: AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces
+
+Organization: Ministry of Home Affairs
+
+Department: Central Reserve Police Force (CRPF), Police II Division
+
+Theme: MedTech / BioTech / HealthTech
+
+Category: Software
+
+Official problem requirements that the prototype must map to:
+
+Analyze HR-related indicators such as leave patterns, deployment history, duty schedules, transfer frequency, training commitments and workload trends.
+
+Support optional self-reporting and wellness assessments through a secure mobile application.
+
+Incorporate voluntary biometric and wellness data where authorized and legally permissible.
+
+Detect behavioral patterns associated with elevated stress risk.
+
+Generate risk assessments and welfare recommendations for authorized welfare officers and commanders.
+
+Enable proactive counseling, welfare interventions and workload balancing.
+
+Use strong privacy safeguards and focus on welfare support rather than disciplinary actions.
+
+Provide a personnel wellness dashboard, mobile wellness/self-assessment application, predictive analytics engine, stress/burnout risk models, recommendation system, RBAC/privacy controls, alerts and secure/anonymized storage.
+
+Source note: the attached official SIH26186 problem statement is the source of truth for requirements. The supplied student-generated SIH Buddy page is treated only as secondary commentary, not as an official source. fileciteturn10file0 fileciteturn19file0
+
+3. ROUND 4 SUBMISSION CONSTRAINTS
+
+Working prototype is mandatory: a static Figma/mockup alone does not qualify.
+
+Partial build is allowed: core functionality must genuinely run.
+
+Demo video: under 3 minutes; only the first 3 minutes are evaluated.
+
+Deadline: 2 September 2026, 10:00 AM. Late work is not evaluated.
+
+Optional links: a deployed link or repository may accompany the video.
+
+Ownership: the prototype must be the team's own work.
+
+Source: official Round 4 announcement and email. fileciteturn17file0 fileciteturn17file1
+
+4. WHAT SEPTERIA IS
+
+SEPTERIA is a welfare-first, context-aware predictive platform for MHA-administered CAPF personnel. Its core purpose is to identify concerning stress/recovery patterns early by combining organizational context, voluntary wellness information and optional physiological signals, then recommend a proportionate human welfare response.
+
+Core principle:
+
+“Stress is not a single sensor reading. Interpret physiology in the context of the person, the duty, the environment and the trajectory.”
+
+5. PRODUCT BOUNDARY FOR THE PROTOTYPE
+
+6. REAL VS SYNTHETIC: NON-NEGOTIABLE
+
+The rule is: MOCK THE SCALE, NOT THE INTELLIGENCE.
+
+Must genuinely work:
+
+Authentication and role-based authorization.
+
+Authority-driven operational context changes.
+
+Bulk assignment of operational context.
+
+Temporary assignment duration/countdown and automatic reversion logic.
+
+Leave/return transition state.
+
+Personnel data flow through backend/database.
+
+Data preprocessing and quality handling.
+
+Personal baseline calculation.
+
+3-zone logic that actually changes analysis.
+
+Stress/recovery prediction using a real trained or properly fitted prototype model/algorithm.
+
+Confidence output and model explanation.
+
+Welfare recommendation logic.
+
+Role-restricted data views.
+
+End-to-end API/database integration.
+
+May use clearly labeled synthetic/demo data:
+
+Large MHA/CAPF population counts.
+
+Historical HRMS records.
+
+Medical/welfare records.
+
+Multiple units and force-wide analytics.
+
+Synthetic wearable streams.
+
+Synthetic environmental data.
+
+Large graph populations.
+
+Historical trends and aggregate dashboard numbers.
+
+7. MHA/CAPF SCOPE
+
+For this prototype, the product language and data model should be specific to the MHA-administered CAPF context of SIH26186. The prototype should use realistic force/unit examples and avoid presenting itself as a generic wellness product for every uniformed service.
+
+Operational contexts should be configurable and mapped to realistic CAPF duties. The three primary analytical zones are:
+
+Post-leave monitoring is NOT a fourth zone. It is a temporary transition state layered on top of the current operational zone.
+
+8. AUTHORITY-CONTROLLED OPERATIONAL CONTEXT
+
+Personnel should not be responsible for continuously maintaining authoritative operational facts that are already managed by the organization. The Authority side is the source of operational context.
+
+Permanent context: posting, unit, role, base/location category.
+
+Operational context: duty, shift, deployment, zone, environmental category, workload context.
+
+Temporary context: operation, temporary posting, temporary shift/location, special assignment.
+
+Events: leave started, leave ended, return to duty, incident exposure, deployment ended.
+
+Bulk changes: an authorized officer can update an entire unit or selected personnel at once.
+
+Critical integrity rule: authority may change the input context, but must not directly edit the AI-generated risk score or recommendation.
+
+9. TIME-BOUND ASSIGNMENTS
+
+A temporary operational change must support start time, end time or duration, countdown, extension and automatic reversion to the previous context.
+
+Historical post-leave findings should be framed as evidence motivating additional welfare attention, not as deterministic suicide prediction rules.
+
+10. PERSONNEL EXPERIENCE
+
+11. AUTHORITY / WELFARE EXPERIENCE
+
+Force Overview: synthetic aggregate cards for personnel, deployments, active zones and welfare trends.
+
+Personnel Management: search/filter personnel and view current authoritative operational context.
+
+Operational Context Manager: create, edit, bulk-apply and expire temporary assignments.
+
+Leave & Transition: record return-from-leave events and start configured transition windows.
+
+Welfare Cases: authorized personnel see persistent risk trajectories, confidence and contributing factors.
+
+Aggregate Intelligence: command view shows unit/force trends without unnecessary raw individual health data.
+
+12. CORE DATA MODEL
+
+13. DATA QUALITY + EVIDENCE STATUS
+
+The system must distinguish what was measured from what was computed or inferred. Use explicit evidence-status labels:
+
+OBSERVED: directly received from an authorized data source.
+
+DERIVED: calculated from observed data, such as rolling HRV trend or baseline deviation.
+
+INFERRED: estimated or reconstructed from a model/graph/context.
+
+UNCERTAIN: data quality or confidence is insufficient for a strong action.
+
+No inferred value should silently appear identical to an observed measurement.
+
+14. PERSONAL BASELINE
+
+The baseline is a central part of the core intelligence. Do not use a one-size-fits-all HRV or HR threshold.
+
+Prototype approach: rolling statistics and robust deviation features first. If a later model demonstrates clear benefit, more advanced baselines may be evaluated. The detailed solution design recommends starting with a strong interpretable baseline and only adding complexity when validation demonstrates an incremental benefit. fileciteturn18file15
+
+15. MULTIMODAL STRESS / RECOVERY PREDICTION
+
+Core model choice for the prototype: XGBoost, with a clear baseline comparator such as logistic regression. Use subject-wise validation rather than random row-level splits when participant identity is available.
+
+The target for the prototype should be a conservative stress/recovery risk level and/or recovery deterioration indicator. It is not a psychiatric diagnosis and is not a suicide-prediction system.
+
+16. MODEL OUTPUT
+
+Every prediction screen should present:
+
+Risk level: LOW / MODERATE / HIGH.
+
+Confidence: numerical or categorical confidence.
+
+Trajectory: stable / improving / deteriorating.
+
+Evidence status: observed/derived/inferred where relevant.
+
+Top contributing factors: actual model explanation, preferably SHAP or equivalent.
+
+Recommended next action: proportionate welfare response.
+
+17. WELFARE ACTION MODEL
+
+The system recommends and explains; authorized welfare/medical personnel make human intervention decisions.
+
+18. CONTEXTUAL PERSONNEL GRAPH
+
+The graph is a contextual intelligence layer, not a system for sharing raw peer medical data. Relationships can reflect shared duty, shift, zone, environment, workload and similar recovery trajectories.
+
+Prototype uses:
+
+Recover: support cautious interpretation of missing/noisy observations using personal history plus contextually similar evidence.
+
+Detect: identify shared deterioration across personnel exposed to similar operating conditions.
+
+Adapt: provide a contextual prior for cold-start users with limited personal history.
+
+Privacy rule: Share context and aggregates, never raw peer health data. The graph and cooperative imputation are proposed mechanisms and require empirical validation before operational use. fileciteturn18file2
+
+19. VOICE MODULE
+
+Voice should be voluntary and context-triggered or scheduled, never a covert background recording mechanism.
+
+20–30 second natural speech sample.
+
+Local/controlled feature extraction where possible.
+
+Acoustic features: F0/pitch, variability, speech rate, pauses, energy and MFCCs.
+
+Compare against the person’s own voice baseline.
+
+Voice is one evidence stream, not a standalone stress detector.
+
+If microphone quality or confidence is poor, reduce confidence rather than forcing a label.
+
+20. AUTHENTICATION AND PRIVACY
+
+Backend authorization must enforce these boundaries. Hiding a button in the frontend is not sufficient.
+
+21. TECHNOLOGY STACK: FROZEN FOR THE PROTOTYPE
+
+Do not introduce Neo4j, TimescaleDB, GNNs, Transformers, federated learning, ONNX, or additional frameworks unless the team explicitly decides they are necessary after the core prototype works.
+
+22. DEVELOPMENT PRINCIPLES FOR ANTIGRAVITY
+
+Do not build all phases at once. Implement one phase, test it, then continue.
+
+Do not silently replace the agreed stack.
+
+Do not claim a feature is working unless it is actually executable end-to-end.
+
+Do not hardcode the final risk score for the core demo.
+
+Use realistic synthetic data where real MHA/CAPF data is unavailable.
+
+Keep mock data visually plausible but label it as demo/simulated where appropriate.
+
+Keep the data model and API contracts stable before multiple team members build against them.
+
+Record model version and evidence status with every prediction.
+
+Build error handling and loading states so the demo does not fail visibly.
+
+Prefer a reliable simple component over an impressive but unstable advanced component.
+
+23. 12-PHASE BUILD ROADMAP
+
+24. CORE DEMO SCENARIO
+
+The entire prototype should be designed to make this single scenario work reliably:
+
+Authority selects a BSF unit and creates a temporary Zone 2 assignment: border/remote/extreme environment, night duty, high heat, 7 days.
+
+Authority applies the assignment in bulk. The database updates the operational context and the countdown begins.
+
+A selected personnel member is marked as returned from leave. A 14-day post-leave transition window activates.
+
+Synthetic multi-day data shows reduced sleep, declining HRV, rising resting HR and higher workload.
+
+The system runs quality checks, identifies the operational zone, computes personal baseline deviation and evaluates the trajectory.
+
+The trained prediction model returns an elevated stress/recovery risk with confidence and contributing factors.
+
+The system recommends a confidential welfare check-in rather than making a clinical or disciplinary judgement.
+
+Welfare view shows the authorized case; commander view shows the aggregate unit trend only.
+
+The authority can later end/extend the deployment and the operational context changes automatically.
+
+25. DEMO VIDEO STRUCTURE: UNDER 3 MINUTES
+
+26. EVIDENCE AND DATA SOURCES
+
+The team has screened a broad evidence base across government policy, occupational health, wearables, physiological stress, AI/ML, military readiness, privacy and datasets. For implementation, the following are the principal evidence anchors to keep visible:
+
+Official SIH26186 problem statement and Round 4 announcement.
+
+Ministry of Home Affairs parliamentary/CAPF welfare data.
+
+WHO mental health at work guidance.
+
+Kim et al. HRV/stress meta-analysis.
+
+Schmidt et al. WESAD multimodal wearable stress dataset.
+
+Recent systematic reviews of wearable stress prediction and personalization.
+
+Military/defence wearable-readiness research from the US and other countries.
+
+NIST AI Risk Management Framework.
+
+India Digital Personal Data Protection Act, 2023.
+
+The team’s supplied biological-feasibility, zonal, market, AI/ML and architecture research.
+
+The full research corpus belongs in the team evidence register/technical dossier. This build brief intentionally focuses on implementation-relevant anchors.
+
+27. CLAIMS WE MUST NOT MAKE
+
+Do not claim that the prototype predicts suicide.
+
+Do not claim clinical diagnosis of PTSD, depression or burnout.
+
+Do not claim CAPF field validation unless it has actually occurred.
+
+Do not claim the graph/imputation has been proven in real field data unless validated.
+
+Do not claim the model is clinically accurate because a synthetic test looks good.
+
+Do not claim authority users can see all personnel medical details.
+
+Do not claim any unbuilt integration is already operational.
+
+28. ACCEPTANCE CRITERIA FOR EACH BUILD PHASE
+
+A phase is complete only when the team can run it twice without manual patching and demonstrate the expected behavior. Antigravity should provide:
+
+What was implemented.
+
+Files/components changed.
+
+How to run it.
+
+How it was tested.
+
+Known limitations.
+
+What remains for the next phase.
+
+Never mark a phase complete based on screenshots alone if the functionality is supposed to be real.
+
+29. FIRST PROMPT TO ANTIGRAVITY
+
+Use the following instruction after supplying this document:
+
+“Read the complete SEPTERIA SIH26186 Antigravity Project Brief before changing code. Treat it as the project build contract. Do not implement later phases yet. Start with PHASE 1 only: establish the agreed monorepo/project structure, Next.js authority web app, Flutter personnel app, FastAPI backend, PostgreSQL connection, environment configuration, Docker setup, base API health check, base frontend-to-backend connection, and clean documentation. Do not add new frameworks, do not implement AI prediction yet, and do not invent features outside the brief. At the end, run a basic end-to-end smoke test and report exactly what works, what does not, and how to start the system.”
+
+30. TEAM DECISION RULE
+
+When deciding whether to add a feature, ask:
+
+Does it directly improve SIH26186 problem-solving, the genuinely working core stress-prediction loop, trust/privacy, or the final demo? If not, defer it.
+
+Source documents used for this brief include the official SIH26186 statement, official Round 4 announcement, supplied Project Plan, supplied AI/ML research, and SEPTERIA technical design materials. The official sources take precedence wherever conflicts exist.
+
+Layer | Prototype behavior
+Personnel App | Private view of own recovery/stress indicators, trends, current context, short wellness check-in, voice check-in and support request.
+Force Authority Dashboard | Maintains personnel/operational context, bulk assignments, temporary assignments, zones, leave/return events, deployment/shift/location/workload updates.
+Welfare/Medical View | Authorized access to relevant welfare cases, contributing factors, confidence and follow-up.
+Commander View | Aggregate unit/force recovery, workload and operational trends; no unnecessary raw individual health data.
+AI Core | Quality checks, personal baseline, 3-zone context, multimodal stress/recovery prediction, confidence, explanation and recommendation.
+Contextual Personnel Graph | Context similarity layer for shared-pattern detection, cautious missing-data support and cold-start support.
+
+Zone | Purpose | Primary emphasis
+Zone 1: High-Intensity / Active Operations | Acute operational load | HR, HRV, activity, sleep, workload, environment
+Zone 2: Border / Remote / Extreme Environment | Cumulative recovery deterioration | HRV trend, resting HR, sleep, workload, deployment, environment
+Zone 3: Critical Incident / Post-Incident Recovery | Incident response and recovery trajectory | HR/HRV, activity, sleep, resting HR, incident timing, recovery after event
+
+Example | Behavior
+BSF Unit 47 → Zone 2 → Night duty → High heat → 7 days | All selected personnel receive the temporary context; countdown is visible; after expiry the previous context is restored unless extended.
+Personnel returns from leave → 14-day transition | A post-leave transition state is automatically activated and layered over the current zone.
+Critical operation starts → Zone 3 | Incident context begins at the recorded event and remains active through the configured recovery window.
+
+Screen | Purpose
+Home / My Recovery | Current status, current operational context, recovery trend, key drivers and support option.
+My Trends | HR/HRV, sleep, activity, recovery trajectory and baseline deviation.
+Wellness Check-in | Short voluntary questions for stress, fatigue, mood, sleep and workload.
+Voice Check-in | Optional 20–30 second voice sample for acoustic features; raw audio retention is not required for the prototype.
+Recommendations | Private recovery guidance and support pathway.
+Support Request | Voluntary request for welfare assistance.
+
+Entity | Key fields / purpose
+User | id, role, authentication fields, unit scope
+Personnel | personnel_id, force, unit, role, posting
+OperationalContext | zone, duty, shift, location category, environment, start, end, source
+Assignment | personnel/unit, context change, start/end, auto_revert, status
+LeaveEvent | start, end, return-to-duty timestamp
+Wellness | timestamp, stress, fatigue, mood, sleep quality, optional notes
+Physiology | timestamp, HR, HRV, resting HR, sleep, activity, respiration, temperature, signal quality
+Baseline | metric, baseline statistics, update timestamp, confidence
+Prediction | risk class, score, confidence, trajectory, drivers, model version
+Recommendation | level, message, action, status, timestamps
+GraphRelation | source, target/context, relation type, similarity/weight, privacy scope
+AuditLog | actor, action, object, timestamp, outcome
+
+Feature family | Examples
+Physiology | HR, HRV, resting HR, HRV trend, baseline deviation
+Sleep / recovery | sleep duration, sleep change, recovery trend
+Activity | activity level, exertion context
+Organizational | duty hours, night duty, consecutive duty, deployment, workload, leave/transition
+Environment | heat/environment category, zone
+Wellness | self-reported stress/fatigue/mood
+Voice | pitch/F0, pitch variability, speech rate, pauses, energy, MFCCs if included
+
+Signal pattern | Prototype action
+Low risk / stable | Continue monitoring
+Moderate + persistent deterioration | Private recovery guidance / optional check-in
+High + persistent + sufficient confidence | Confidential welfare check recommendation
+Explicit support request / concerning welfare information | Authorized professional assessment pathway
+
+Role | Default visibility
+Personnel | Own wellness/recovery information and support tools.
+Welfare Officer | Authorized welfare cases and relevant explanations.
+Medical Officer | Authorized health/welfare context required for professional assessment.
+Commander | Aggregate unit/force trends, workload and operational context; avoid unnecessary personal health details.
+Admin | System management, permissions and audit functions.
+
+Layer | Technology | Why
+Personnel mobile | Flutter + Dart | One mobile codebase for the required secure self-assessment app.
+Authority web | Next.js + React + Tailwind CSS | Fast, clear web dashboard for administration and analytics.
+Backend | FastAPI + Python | Natural fit for APIs and ML integration.
+Database | PostgreSQL | Single relational source of truth for prototype data.
+ML | pandas + NumPy + scikit-learn + XGBoost + SHAP | Interpretable, practical tabular ML stack.
+Graph | NetworkX + PostgreSQL | Simple contextual graph without premature GNN complexity.
+Voice | librosa | Acoustic feature extraction.
+Integration | BLE + Android Health Connect | Path to wearable integration after core pipeline works.
+Security | JWT + RBAC + encryption + audit logs | Prototype security foundation.
+Deployment | Docker | Reproducible deployment and controlled-network option.
+
+Phase | Goal | Key deliverable
+1 | Foundation | Monorepo structure, Next.js, Flutter, FastAPI, PostgreSQL, env/config, Docker
+2 | Authentication + RBAC | Login, JWT, role routing, protected APIs
+3 | MHA/CAPF Data Foundation | Schema, seed data, force/unit/personnel structure
+4 | Authority Dashboard | Force overview, personnel search, context management
+5 | Dynamic Operational Context | Bulk assignment, temporary duration, countdown, auto-revert, leave events
+6 | Personnel App | Recovery view, wellness check-in, trends, support request, voice UI
+7 | Data Ingestion + Quality | Physiology/wellness/context inputs, cleaning, evidence status
+8 | Baseline + 3-Zone Engine | Personal baseline, deviation, zone-specific logic, transition states
+9 | AI Training + Prediction | Dataset pipeline, baseline comparator, XGBoost, validation, SHAP, inference API
+10 | Contextual Personnel Graph | NetworkX relations, shared-pattern detection, cautious imputation, cold start
+11 | Voice + Welfare Intelligence | Voice features, multimodal fusion, recommendation workflow
+12 | Integration + Demo | End-to-end integration, privacy tests, synthetic scenario, 3-minute video
+
+Time | What the judge sees
+0:00–0:15 | One-line SIH26186 problem and what SEPTERIA does.
+0:15–0:45 | Authority creates a temporary unit assignment and bulk zone/context update.
+0:45–1:10 | Personnel view: post-leave transition + baseline/trend.
+1:10–1:45 | Data changes; quality/context/baseline pipeline runs.
+1:45–2:15 | Real prediction appears with confidence + SHAP drivers.
+2:15–2:35 | Welfare recommendation and authorized welfare view.
+2:35–2:50 | Commander aggregate view + privacy boundary.
+2:50–3:00 | USP: context-aware, personalized, predictive, privacy-first.
+

@@ -1,0 +1,59 @@
+# ==============================================================================
+# SEPTERIA (SIH26186) - Docker Build Context Ignore
+# Ensures ONLY runtime backend, shared schemas, database, and models are copied.
+# ==============================================================================
+
+# Datasets & Training Tables
+Dataset/
+Dataset
+ml/data/
+ml/results/
+ml/src/
+ml/tests/
+*.csv
+*.parquet
+*.h5
+*.mat
+*.edf
+*.dat
+*.hea
+*.fif
+
+# Local Databases & Secrets
+septeria.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+.env*
+*.pem
+*.key
+
+# Frontend Applications (Deployed separately on Vercel/Static hosts)
+apps/
+
+# Git & IDE
+.git
+.gitignore
+.github
+.idea
+.vscode
+*.swp
+*.swo
+
+# Tests & Documentation
+docs/
+backend/tests/
+.pytest_cache/
+.coverage
+htmlcov/
+*.md
+
+# Python & Node Caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+node_modules/

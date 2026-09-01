@@ -1,0 +1,91 @@
+# ==============================================================================
+# SEPTERIA (SIH26186) - Git Ignore Configuration
+# ==============================================================================
+
+# Environment & Production Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+
+# Public Datasets & Training Data (Do not upload to Git / Production)
+Dataset/
+Dataset
+ml/data/processed/
+ml/data/raw/
+ml/data/raw_data/
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+septeria.db
+
+# Python & Backend Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.venv
+venv/
+ENV/
+
+# Node / Next.js Authority Web
+apps/authority-web/node_modules/
+apps/authority-web/.next/
+apps/authority-web/out/
+apps/authority-web/.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Flutter / Dart Personnel Mobile App
+apps/personnel-mobile/.dart_tool/
+apps/personnel-mobile/.flutter-plugins
+apps/personnel-mobile/.flutter-plugins-dependencies
+apps/personnel-mobile/.packages
+apps/personnel-mobile/build/
+apps/personnel-mobile/ios/Flutter/Generated.xcconfig
+apps/personnel-mobile/ios/Flutter/flutter_export_environment.sh
+apps/personnel-mobile/android/local.properties
+apps/personnel-mobile/android/.gradle
+apps/personnel-mobile/coverage/
+
+# Explicitly ensure application source directories are tracked
+!apps/authority-web/src/lib/
+!apps/personnel-mobile/lib/
+
+# IDE & OS Artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.log
