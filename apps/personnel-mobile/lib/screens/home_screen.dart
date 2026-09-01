@@ -193,6 +193,49 @@ class _HomeDashboardTabState extends State<_HomeDashboardTab> {
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Edge Hardware & Sync Status
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF334155)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.bluetooth_connected, color: Color(0xFF38BDF8), size: 18),
+                                  const SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'DEVICE: Connected',
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                      ),
+                                      Text(
+                                        'Sync: Just now',
+                                        style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text('SQI: EXCELLENT', style: TextStyle(color: Color(0xFF10B981), fontSize: 10, fontWeight: FontWeight.bold)),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -270,9 +313,24 @@ class _HomeDashboardTabState extends State<_HomeDashboardTab> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  _buildCompactTrend('Recovery', isAmber ? Icons.arrow_downward : Icons.arrow_forward, isAmber ? const Color(0xFFEF4444) : const Color(0xFF94A3B8)),
-                                  _buildCompactTrend('Sleep', isAmber ? Icons.arrow_downward : Icons.arrow_upward, isAmber ? const Color(0xFFEF4444) : const Color(0xFF10B981)),
-                                  _buildCompactTrend('Resting state', isAmber ? Icons.arrow_upward : Icons.arrow_forward, isAmber ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8)),
+                                  _buildCompactTrend(
+                                    'HRV', 
+                                    '${_state?.deviations['hrv']?.observed?.toStringAsFixed(0) ?? '52'}ms',
+                                    isAmber ? Icons.arrow_downward : Icons.arrow_forward, 
+                                    isAmber ? const Color(0xFFEF4444) : const Color(0xFF94A3B8)
+                                  ),
+                                  _buildCompactTrend(
+                                    'Sleep', 
+                                    '${_state?.deviations['sleep']?.observed?.toStringAsFixed(1) ?? '6.2'}h',
+                                    isAmber ? Icons.arrow_downward : Icons.arrow_upward, 
+                                    isAmber ? const Color(0xFFEF4444) : const Color(0xFF10B981)
+                                  ),
+                                  _buildCompactTrend(
+                                    'Resting HR', 
+                                    '${_state?.deviations['resting_hr']?.observed?.toStringAsFixed(0) ?? '65'}bpm',
+                                    isAmber ? Icons.arrow_upward : Icons.arrow_forward, 
+                                    isAmber ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8)
+                                  ),
                                 ],
                               ),
                             ],
