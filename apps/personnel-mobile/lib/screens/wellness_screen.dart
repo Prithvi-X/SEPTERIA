@@ -12,6 +12,7 @@ class WellnessScreen extends StatefulWidget {
 
 class _WellnessScreenState extends State<WellnessScreen> {
   final ApiService _apiService = ApiService();
+  final PageController _pageController = PageController();
 
   int _stress = 3;
   int _fatigue = 3;
@@ -21,35 +22,30 @@ class _WellnessScreenState extends State<WellnessScreen> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _isSubmitting = false;
-  bool _isLoadingHistory = true;
-  List<WellnessRecordModel> _history = [];
-  String? _successMessage;
+  bool _isComplete = false;
+  int _currentPage = 0;
   String? _errorMessage;
 
+  final int _totalPages = 6; // 5 questions + 1 notes
+
   @override
-  void initState() {
-    super.initState();
-    _fetchHistory();
+  void dispose() {
+    _notesController.dispose();
+    _pageController.dispose();
+    super.dispose();
   }
 
-  Future<void> _fetchHistory() async {
-    setState(() {
-      _isLoadingHistory = true;
-    });
+  void _nextPage() {
+    if (_currentPage < _totalPages - 1) {
+      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    } else {
+      _submitCheckIn();
+    }
+  }
 
-    try {
-      final records = await _apiService.getWellnessHistory();
-      setState(() {
-        _history = records;
-      });
-    } catch (e) {
-      // Ignored for now or logged
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingHistory = false;
-        });
-      }
+  void _prevPage() {
+    if (_currentPage > 0) {
+      _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     }
   }
 
@@ -57,11 +53,10 @@ class _WellnessScreenState extends State<WellnessScreen> {
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
-      _successMessage = null;
     });
 
     try {
-      final record = await _apiService.submitWellnessCheckIn(
+      await _apiService.submitWellnessCheckIn(
         stress: _stress,
         fatigue: _fatigue,
         sleepQuality: _sleepQuality,
@@ -71,14 +66,7 @@ class _WellnessScreenState extends State<WellnessScreen> {
       );
 
       setState(() {
-        _successMessage = 'Wellness check-in recorded successfully.';
-        _history.insert(0, record);
-        _notesController.clear();
-        _stress = 3;
-        _fatigue = 3;
-        _sleepQuality = 3;
-        _mood = 3;
-        _workload = 3;
+        _isComplete = true;
       });
     } catch (e) {
       setState(() {
@@ -94,356 +82,232 @@ class _WellnessScreenState extends State<WellnessScreen> {
   }
 
   @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    if (_isComplete) {
+      return _buildCompleteScreen();
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        title: const Text('DAILY WELLNESS CHECK-IN', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 1.0)),
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          // Progress Bar
+          LinearProgressIndicator(
+            value: (_currentPage + 1) / _totalPages,
+            backgroundColor: const Color(0xFF1E293B),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF38BDF8)),
+            minHeight: 2,
+          ),
+          
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(), // Disable swipe to force using buttons
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              children: [
+                _buildQuestionPage('Stress', 'How would you rate your current stress level?', _stress, (v) => setState(() => _stress = v)),
+                _buildQuestionPage('Fatigue', 'How physically or mentally fatigued are you?', _fatigue, (v) => setState(() => _fatigue = v)),
+                _buildQuestionPage('Sleep', 'How was your recent sleep quality?', _sleepQuality, (v) => setState(() => _sleepQuality = v)),
+                _buildQuestionPage('Mood', 'How would you rate your general mood today?', _mood, (v) => setState(() => _mood = v)),
+                _buildQuestionPage('Workload', 'How manageable is your current workload?', _workload, (v) => setState(() => _workload = v)),
+                _buildNotesPage(),
+              ],
+            ),
+          ),
+          
+          _buildBottomNavigation(),
+        ],
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCompleteScreen() {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Voluntary Wellness Check-in'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Check-in Form Card
-            Card(
-              color: const Color(0xFF1E293B),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'DAILY SELF-REPORTING',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF38BDF8),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0x3310B981),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'VOLUNTARY & PRIVATE',
-                            style: TextStyle(fontSize: 9, color: Color(0xFF34D399), fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'How are you feeling today?',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Quick 1–5 self-assessment to monitor your personal recovery and workload.',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
-                    ),
-                    const SizedBox(height: 16),
-
-                    if (_successMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0x3310B981),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF059669)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_circle, color: Color(0xFF34D399), size: 16),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _successMessage!,
-                                style: const TextStyle(color: Color(0xFF34D399), fontSize: 11),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-
-                    if (_errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0x667F1D1D),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFB91C1C)),
-                        ),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.redAccent, fontSize: 11),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-
-                    // Scale 1: Stress Level
-                    _buildScaleSelector(
-                      title: 'Stress Level',
-                      description: '1: Very Low (Relaxed) • 5: Very High (Intense)',
-                      value: _stress,
-                      onChanged: (val) => setState(() => _stress = val),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Scale 2: Fatigue Level
-                    _buildScaleSelector(
-                      title: 'Fatigue / Exhaustion',
-                      description: '1: Fresh (Energized) • 5: Exhausted (Drained)',
-                      value: _fatigue,
-                      onChanged: (val) => setState(() => _fatigue = val),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Scale 3: Sleep Quality
-                    _buildScaleSelector(
-                      title: 'Sleep Quality',
-                      description: '1: Poor (Restless) • 5: Excellent (Deep)',
-                      value: _sleepQuality,
-                      onChanged: (val) => setState(() => _sleepQuality = val),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Scale 4: Overall Mood
-                    _buildScaleSelector(
-                      title: 'Overall Mood',
-                      description: '1: Distressed • 5: Great (Positive)',
-                      value: _mood,
-                      onChanged: (val) => setState(() => _mood = val),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Scale 5: Workload Manageability
-                    _buildScaleSelector(
-                      title: 'Workload Manageability',
-                      description: '1: Overwhelming • 5: Highly Manageable',
-                      value: _workload,
-                      onChanged: (val) => setState(() => _workload = val),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Optional Notes Field
-                    TextFormField(
-                      controller: _notesController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'Optional Personal Note (Private)',
-                        hintText: 'e.g., Extended night patrol shift in extreme heat.',
-                        filled: true,
-                        fillColor: const Color(0xFF0F172A),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFF334155)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    ElevatedButton.icon(
-                      onPressed: _isSubmitting ? null : _submitCheckIn,
-                      icon: _isSubmitting
-                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : const Icon(Icons.send_rounded, size: 16),
-                      label: const Text('Submit Check-in'),
-                    ),
-                  ],
-                ),
+      backgroundColor: const Color(0xFF0F172A),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 64),
+              const SizedBox(height: 24),
+              const Text('CHECK-IN COMPLETE', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.0)),
+              const SizedBox(height: 12),
+              const Text(
+                'Thanks. Your response is part of your private wellness record.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15, color: Color(0xFF94A3B8), height: 1.4),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Wellness Check-in History Section
-            const Text(
-              'WELLNESS CHECK-IN HISTORY',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF94A3B8),
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            if (_isLoadingHistory)
-              const Center(child: Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator()))
-            else if (_history.isEmpty)
-              Card(
-                color: const Color(0xFF1E293B),
-                child: const Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Center(
-                    child: Text(
-                      'No past check-ins recorded yet. Complete your first voluntary check-in above.',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _history.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final item = _history[index];
-                  final dateStr = DateFormat('dd MMM yyyy • hh:mm a').format(item.timestamp);
-
-                  return Card(
-                    color: const Color(0xFF1E293B),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                dateStr,
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF38BDF8)),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x3310B981),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                                child: Text(
-                                  item.evidenceStatus,
-                                  style: const TextStyle(fontSize: 8, color: Color(0xFF34D399), fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _buildScoreBadge('Stress', item.stress, Colors.redAccent),
-                              const SizedBox(width: 6),
-                              _buildScoreBadge('Fatigue', item.fatigue, Colors.amber),
-                              const SizedBox(width: 6),
-                              _buildScoreBadge('Sleep', item.sleepQuality, Colors.purpleAccent),
-                              const SizedBox(width: 6),
-                              _buildScoreBadge('Mood', item.mood, Colors.blueAccent),
-                              const SizedBox(width: 6),
-                              _buildScoreBadge('Workload', item.workload, Colors.tealAccent),
-                            ],
-                          ),
-                          if (item.notes != null && item.notes!.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              item.notes!,
-                              style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Color(0xFFCBD5E1)),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  );
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isComplete = false;
+                    _currentPage = 0;
+                    _stress = 3;
+                    _fatigue = 3;
+                    _sleepQuality = 3;
+                    _mood = 3;
+                    _workload = 3;
+                    _notesController.clear();
+                  });
                 },
-              ),
-          ],
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E293B),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+                child: const Text('Submit another', style: TextStyle(color: Colors.white)),
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildScaleSelector({
-    required String title,
-    required String description,
-    required int value,
-    required ValueChanged<int> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-            Text(
-              '$value / 5',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          description,
-          style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: List.generate(5, (index) {
-            final score = index + 1;
-            final isSelected = score == value;
-
-            return Expanded(
-              child: GestureDetector(
-                onTap: () => onChanged(score),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2.0),
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+  Widget _buildQuestionPage(String category, String question, int currentValue, Function(int) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            category.toUpperCase(),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8), letterSpacing: 1.0),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            question,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
+          ),
+          const SizedBox(height: 48),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(5, (index) {
+              final value = index + 1;
+              final isSelected = currentValue == value;
+              return GestureDetector(
+                onTap: () => onChanged(value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(8),
+                    color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF1E293B),
+                    shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF334155),
+                      width: 2,
                     ),
                   ),
-                  child: Center(
-                    child: Text(
-                      '$score',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                      ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    value.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? const Color(0xFF0F172A) : Colors.white,
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
-        ),
-      ],
+              );
+            }),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('Very low', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text('Very high', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildScoreBadge(String label, int val, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF334155)),
+  Widget _buildNotesPage() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'ADD A PRIVATE NOTE',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8), letterSpacing: 1.0),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Anything you\'d like your welfare team to know?',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _notesController,
+            maxLines: 4,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Optional',
+              hintStyle: const TextStyle(color: Color(0xFF475569)),
+              filled: true,
+              fillColor: const Color(0xFF1E293B),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF38BDF8)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (_errorMessage != null)
+            Text(_errorMessage!, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 12)),
+        ],
       ),
-      child: Text(
-        '$label: $val',
-        style: const TextStyle(fontSize: 9, color: Color(0xFFCBD5E1)),
+    );
+  }
+
+  Widget _buildBottomNavigation() {
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (_currentPage > 0)
+            TextButton(
+              onPressed: _prevPage,
+              child: const Text('Back', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+            )
+          else
+            const SizedBox.shrink(),
+            
+          ElevatedButton(
+            onPressed: _isSubmitting ? null : _nextPage,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF38BDF8),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: _isSubmitting 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2))
+              : Text(_currentPage == _totalPages - 1 ? 'Save / Submit' : 'Next', style: const TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

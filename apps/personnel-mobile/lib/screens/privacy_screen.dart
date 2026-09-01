@@ -106,7 +106,7 @@ class PrivacyScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0x4D2563EB)),
               ),
               child: const Text(
-                'SIH26186 • SEPTERIA AI Welfare Architecture • Data Protected by End-to-End Cryptographic JWT Bearer Tokens & TLS Encryption.',
+                'SIH26186 • SEPTERIA Personnel Operations Architecture • Data Protected by End-to-End Cryptographic JWT Bearer Tokens & TLS Encryption.',
                 style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), height: 1.4),
                 textAlign: TextAlign.center,
               ),
