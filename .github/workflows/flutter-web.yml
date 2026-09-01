@@ -1,0 +1,49 @@
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/personnel-mobile/**'
+      - '.github/workflows/flutter-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.1' # You can adjust to match your local version
+
+      - name: Install dependencies
+        working-directory: apps/personnel-mobile
+        run: flutter pub get
+
+      - name: Build Web App
+        working-directory: apps/personnel-mobile
+        run: flutter build web --release --base-href "/SEPTERIA/" --dart-define=API_BASE_URL=https://septeria-production.up.railway.app/api/v1
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './apps/personnel-mobile/build/web'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
