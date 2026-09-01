@@ -238,9 +238,16 @@ class PersonalStateService:
         )
 
         # 6. Compute Recovery Debt (Provisional Prototype Heuristic)
-        sleep_deficit = raw_deviations.get("sleep", {}).get("sleep_deficit_hours", 0.0)
-        hrv_pct_dev = abs(min(0.0, raw_deviations.get("hrv", {}).get("relative_deviation_pct", 0.0)))
-        rhr_elev = max(0.0, raw_deviations.get("resting_hr", {}).get("absolute_deviation", 0.0))
+        sleep_dev_info = raw_deviations.get("sleep", {})
+        hrv_dev_info = raw_deviations.get("hrv", {})
+        rhr_dev_info = raw_deviations.get("resting_hr", {})
+
+        sleep_deficit = sleep_dev_info.get("sleep_deficit_hours") or 0.0
+        hrv_pct_raw = hrv_dev_info.get("relative_deviation_pct") or 0.0
+        hrv_pct_dev = abs(min(0.0, float(hrv_pct_raw)))
+        
+        rhr_elev_raw = rhr_dev_info.get("absolute_deviation") or 0.0
+        rhr_elev = max(0.0, float(rhr_elev_raw))
 
         debt_data = self.recovery_debt_engine.calculate_recovery_debt(
             sleep_deficit_hours=sleep_deficit,
