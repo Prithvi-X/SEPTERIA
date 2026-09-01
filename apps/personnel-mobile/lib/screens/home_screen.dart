@@ -398,12 +398,19 @@ class _HomeDashboardTabState extends State<_HomeDashboardTab> {
     );
   }
 
-  Widget _buildCompactTrend(String label, IconData icon, Color color) {
-    return Row(
+  Widget _buildCompactTrend(String label, String value, IconData icon, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
-        const SizedBox(width: 4),
-        Icon(icon, size: 14, color: color),
+        Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(width: 4),
+            Icon(icon, size: 14, color: color),
+          ],
+        ),
       ],
     );
   }
