@@ -108,11 +108,33 @@ class _RecoveryScreenState extends State<RecoveryScreen> {
 
                           const Text('RECENT INDICATORS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF64748B), letterSpacing: 1.0)),
                           const SizedBox(height: 12),
-                          _buildIndicatorRow('Sleep', 'Less than your recent average', Icons.bedtime),
+                          _buildIndicatorRow(
+                            'Sleep', 
+                            _getDeviationText(_personalState?.deviations['sleep']?.absoluteDeviation), 
+                            Icons.bedtime,
+                            '${_personalState?.deviations['sleep']?.observed?.toStringAsFixed(1) ?? '--'}h'
+                          ),
                           const Divider(color: Color(0xFF1E293B)),
-                          _buildIndicatorRow('Rest', 'Below your usual range', Icons.favorite_border),
+                          _buildIndicatorRow(
+                            'Resting HR', 
+                            _getDeviationText(_personalState?.deviations['resting_hr']?.absoluteDeviation, inverse: true), 
+                            Icons.favorite_border,
+                            '${_personalState?.deviations['resting_hr']?.observed?.toStringAsFixed(0) ?? '--'} bpm'
+                          ),
                           const Divider(color: Color(0xFF1E293B)),
-                          _buildIndicatorRow('Activity', 'Consistent with deployment', Icons.directions_walk),
+                          _buildIndicatorRow(
+                            'HRV (Recovery)', 
+                            _getDeviationText(_personalState?.deviations['hrv']?.absoluteDeviation), 
+                            Icons.monitor_heart,
+                            '${_personalState?.deviations['hrv']?.observed?.toStringAsFixed(0) ?? '--'} ms'
+                          ),
+                          const Divider(color: Color(0xFF1E293B)),
+                          _buildIndicatorRow(
+                            'Activity', 
+                            'Consistent with deployment', 
+                            Icons.directions_walk,
+                            '${_personalState?.deviations['activity']?.observed?.toStringAsFixed(0) ?? '--'} steps'
+                          ),
                         ],
                       ),
                     ),
@@ -214,7 +236,13 @@ class _RecoveryScreenState extends State<RecoveryScreen> {
     );
   }
 
-  Widget _buildIndicatorRow(String title, String subtitle, IconData icon) {
+  String _getDeviationText(double? absoluteDeviation, {bool inverse = false}) {
+    if (absoluteDeviation == null || absoluteDeviation.abs() < 2.0) return 'Consistent with your usual pattern';
+    if (absoluteDeviation > 0) return inverse ? 'Elevated above your recent average' : 'Above your recent average';
+    return inverse ? 'Below your recent average' : 'Less than your recent average';
+  }
+
+  Widget _buildIndicatorRow(String title, String subtitle, IconData icon, String valueStr) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -231,6 +259,7 @@ class _RecoveryScreenState extends State<RecoveryScreen> {
               ],
             ),
           ),
+          Text(valueStr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
         ],
       ),
     );
