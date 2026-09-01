@@ -1,0 +1,17 @@
+{
+  "name": "septeria-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/authority-web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/authority-web",
+    "build": "npm run build --workspace=apps/authority-web",
+    "start": "npm run start --workspace=apps/authority-web",
+    "lint": "npm run lint --workspace=apps/authority-web"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
