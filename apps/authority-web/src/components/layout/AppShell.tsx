@@ -33,12 +33,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Force Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Personnel Directory', href: '/personnel', icon: Users },
-  { name: 'Operational Context', href: '/operations', icon: MapPin },
-  { name: 'Medical & Welfare Review', href: '/welfare', icon: HeartHandshake },
-  { name: 'Command Force Intelligence', href: '/analytics', icon: BarChart3 },
-  { name: 'System Administration', href: '/settings', icon: Settings },
+  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Personnel', href: '/personnel', icon: Users },
+  { name: 'Operations', href: '/operations', icon: MapPin },
+  { name: 'Welfare Review', href: '/welfare', icon: HeartHandshake },
+  { name: 'Unit Intelligence', href: '/analytics', icon: BarChart3 },
+  { name: 'System', href: '/settings', icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -105,34 +105,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-      {/* Top Banner: Synthetic Demonstration Notice & Claim Invariants */}
-      <div className="bg-amber-950/90 border-b border-amber-800/80 px-4 py-1.5 flex items-center justify-between text-xs text-amber-200 z-40 sticky top-0">
+      {/* Top Banner: Synthetic Demonstration Notice */}
+      <div className="bg-slate-900 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-xs text-slate-400 z-40 sticky top-0">
         <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          <span className="font-medium tracking-wide uppercase text-[11px] text-slate-500">
+            DEMO MODE • SYNTHETIC DATA
           </span>
-          <span className="font-semibold tracking-wide uppercase text-[11px] bg-amber-900/80 px-2 py-0.5 rounded border border-amber-700/60">
-            DEMO MODE • SYNTHETIC DEMONSTRATION DATA
-          </span>
-          <span className="hidden md:inline text-[11px] text-amber-300/80">
-            Non-punitive decision support prototype (SIH26186). Not a clinical diagnostic tool.
+          <span className="hidden md:inline text-[11px] text-slate-500">
+            This prototype uses simulated personnel and telemetry.
           </span>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setDemoModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-0.5 rounded bg-blue-600/80 hover:bg-blue-600 text-white font-medium text-[11px] transition shadow-sm"
+            className="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-slate-800 text-slate-400 font-medium text-[11px] transition"
           >
-            <Zap className="w-3 h-3 text-amber-300" />
+            <Settings className="w-3 h-3" />
             <span>Demo Controls</span>
-          </button>
-          <button
-            onClick={handleOpenHealthAudit}
-            className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 text-[11px] border border-slate-700"
-          >
-            <Server className="w-3 h-3 text-emerald-400" />
-            <span>System Audit</span>
           </button>
         </div>
       </div>
@@ -142,12 +131,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <aside className="hidden md:flex md:w-64 flex-col bg-slate-950 border-r border-slate-800">
           {/* Brand Header */}
           <div className="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-            <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
+            <div className="text-slate-300">
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-base font-bold tracking-wide text-white">SEPTERIA</h1>
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Authority Portal</p>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Personnel Welfare & Operational Readiness</p>
             </div>
           </div>
 
@@ -162,7 +151,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 font-semibold'
+                      ? 'bg-slate-800 text-white font-semibold'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                   }`}
                 >

@@ -1,27 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
-import { api, MultimodalAssessment, PersonnelItem } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import {
   HeartHandshake,
-  ShieldCheck,
-  Activity,
-  UserCheck,
-  TrendingDown,
   Clock,
-  Mic,
-  Network,
   AlertTriangle,
   CheckCircle2,
-  FileText,
   ChevronRight,
   Shield,
   Stethoscope,
-  Sparkles,
-  Info
+  Info,
+  Calendar,
+  ChevronDown
 } from 'lucide-react';
 
+// Using the same mock interfaces as before but rendering them strictly
 interface WelfareCase {
   id: string;
   personnelId: string;
@@ -35,14 +30,9 @@ interface WelfareCase {
   transitionStatus: string;
   welfareState: 'RED' | 'AMBER' | 'YELLOW' | 'GREEN' | 'WELFARE_CHECK';
   compositeScore: number;
-  agreementIndex: number;
   sleepDebtHours: number;
-  recoveryBurdenScore: number;
   hrShift: number;
   hrvCurrent: number;
-  graphClusterId: string;
-  graphAffectedCount: number;
-  voiceDeviation: number;
   recommendedAction: string;
   acknowledged: boolean;
 }
@@ -52,458 +42,282 @@ const DEMO_WELFARE_CASES: WelfareCase[] = [
     id: 'case-01',
     personnelId: 'BSF-47-01',
     name: 'Constable Rajesh Kumar',
-    rank: 'Constable (GD)',
+    rank: 'Constable',
     unit: 'BSF-BN-47',
     force: 'BSF',
-    zone: 'Zone 2 (Border/Remote)',
+    zone: 'Zone 2',
     duty: 'Border Patrol',
     shift: 'Night (20:00 - 04:00)',
-    transitionStatus: 'Post-Leave Day 3 / 14',
+    transitionStatus: 'Active Duty',
     welfareState: 'WELFARE_CHECK',
-    compositeScore: 0.855,
-    agreementIndex: 0.84,
+    compositeScore: 0.89,
     sleepDebtHours: 4.5,
-    recoveryBurdenScore: 78,
-    hrShift: 20.0,
-    hrvCurrent: 24.0,
-    graphClusterId: 'PAT-BSF-BN-47-ZONE_2-Night-1',
-    graphAffectedCount: 14,
-    voiceDeviation: 0.972,
-    recommendedAction: 'Recommend authorized unit welfare check (Corroborating multi-stream strain across baseline, recovery, and operational indicators).',
+    hrShift: +22,
+    hrvCurrent: 24,
+    recommendedAction: 'Schedule Immediate Wellness Consult',
     acknowledged: false,
   },
   {
     id: 'case-02',
-    personnelId: 'CRPF-88-04',
-    name: 'Head Constable Amit Sharma',
-    rank: 'Head Constable',
-    unit: 'CRPF-BN-88',
-    force: 'CRPF',
-    zone: 'Zone 1 (Active Ops)',
-    duty: 'QRT Mobile Patrol',
-    shift: 'Day',
-    transitionStatus: 'Standard Deployment',
+    personnelId: 'BSF-47-14',
+    name: 'Inspector Sunil Verma',
+    rank: 'Inspector',
+    unit: 'BSF-BN-47',
+    force: 'BSF',
+    zone: 'Zone 1',
+    duty: 'Base Admin',
+    shift: 'Day (08:00 - 16:00)',
+    transitionStatus: 'Post-Leave (Day 3)',
     welfareState: 'AMBER',
-    compositeScore: 0.620,
-    agreementIndex: 0.72,
-    sleepDebtHours: 2.8,
-    recoveryBurdenScore: 56,
-    hrShift: 12.0,
-    hrvCurrent: 38.0,
-    graphClusterId: 'PAT-CRPF-BN-88-ZONE_1-Day-2',
-    graphAffectedCount: 6,
-    voiceDeviation: 0.410,
-    recommendedAction: 'Recommend designated section peer check and duty rotation review.',
-    acknowledged: true,
+    compositeScore: 0.72,
+    sleepDebtHours: 2.5,
+    hrShift: +15,
+    hrvCurrent: 40,
+    recommendedAction: 'Monitor Remotely; Post-leave transition',
+    acknowledged: false,
   },
   {
     id: 'case-03',
-    personnelId: 'ITBP-12-09',
-    name: 'Constable Tenzing Norbu',
-    rank: 'Constable (GD)',
-    unit: 'ITBP-BN-12',
-    force: 'ITBP',
-    zone: 'Zone 2 (High Altitude)',
-    duty: 'High Altitude Guard',
-    shift: 'Night',
-    transitionStatus: 'Post-Leave Day 8 / 14',
+    personnelId: 'CRPF-102-09',
+    name: 'Constable Amit Singh',
+    rank: 'Constable',
+    unit: 'CRPF-102',
+    force: 'CRPF',
+    zone: 'Zone 3',
+    duty: 'Static Guard',
+    shift: 'Evening (16:00 - 00:00)',
+    transitionStatus: 'Active Duty',
     welfareState: 'YELLOW',
-    compositeScore: 0.440,
-    agreementIndex: 0.65,
+    compositeScore: 0.58,
     sleepDebtHours: 1.5,
-    recoveryBurdenScore: 42,
-    hrShift: 6.0,
-    hrvCurrent: 52.0,
-    graphClusterId: 'NONE',
-    graphAffectedCount: 0,
-    voiceDeviation: 0.200,
-    recommendedAction: 'Homeostasis maintained within altitude operational bounds; continue routine monitoring.',
-    acknowledged: false,
-  },
+    hrShift: +8,
+    hrvCurrent: 55,
+    recommendedAction: 'No immediate action required',
+    acknowledged: true,
+  }
 ];
 
 export default function WelfarePage() {
+  const { user } = useAuth();
   const [cases, setCases] = useState<WelfareCase[]>(DEMO_WELFARE_CASES);
-  const [selectedCase, setSelectedCase] = useState<WelfareCase>(DEMO_WELFARE_CASES[0]);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(DEMO_WELFARE_CASES[0].id);
+  const [showTechnical, setShowTechnical] = useState(false);
 
-  const handleAcknowledge = (caseId: string) => {
-    setCases((prev) =>
-      prev.map((c) => (c.id === caseId ? { ...c, acknowledged: true } : c))
-    );
-    if (selectedCase.id === caseId) {
-      setSelectedCase((prev) => ({ ...prev, acknowledged: true }));
-    }
-    setActionSuccess('Case acknowledged. Logged to Unit Medical Officer audit record.');
-    setTimeout(() => setActionSuccess(null), 3500);
+  const selectedCase = cases.find(c => c.id === selectedCaseId) || cases[0];
+
+  const handleAcknowledge = () => {
+    setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, acknowledged: true } : c));
   };
 
-  const handleAction = (actionText: string) => {
-    setActionSuccess(`Action initiated: "${actionText}". Notification sent to designated personnel.`);
-    setTimeout(() => setActionSuccess(null), 4000);
-  };
-
-  const getStateBadge = (state: string) => {
+  const getUrgencyColor = (state: string) => {
     switch (state) {
-      case 'RED':
-      case 'WELFARE_CHECK':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-950/80 text-red-300 border border-red-800/80 flex items-center gap-1.5 animate-pulse">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-            ELEVATED WELFARE CONCERN
-          </span>
-        );
-      case 'AMBER':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950/80 text-amber-300 border border-amber-800/80 flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-            MODERATE STRAIN (MONITOR)
-          </span>
-        );
-      case 'YELLOW':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-950/80 text-yellow-300 border border-yellow-800/80 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-yellow-400" />
-            MILD ELEVATION (ROUTINE)
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            RECOVERY EQUILIBRIUM
-          </span>
-        );
+      case 'WELFARE_CHECK': return 'text-red-500 bg-red-500/10 border-red-500/20';
+      case 'RED': return 'text-red-400 bg-red-400/10 border-red-400/20';
+      case 'AMBER': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+      case 'YELLOW': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+      default: return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
     }
   };
 
   return (
-    <ProtectedRoute allowedRoles={['welfare_officer', 'medical_officer', 'admin']}>
-      <div className="space-y-6">
-        {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800 pb-5">
+    <ProtectedRoute allowedRoles={['commander', 'welfare_officer', 'medical_officer', 'admin']}>
+      <div className="space-y-6 max-w-7xl mx-auto h-[calc(100vh-6rem)] flex flex-col">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-slate-800 pb-4 shrink-0">
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">Medical & Welfare Case Review</h1>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-900/60 text-blue-300 border border-blue-700/60 uppercase">
-                Confidential Officer View
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Multi-stream evidence synthesis, personal autonomic deviation tracking, and human-in-the-loop care protocols
+            <h1 className="text-xl font-bold text-white tracking-tight uppercase">Medical & Welfare Review</h1>
+            <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">
+              Confidential Personnel Recovery Monitoring
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 text-xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Medical RBAC Active</span>
-            </div>
+          <div className="text-xs text-slate-500 font-medium">
+            <span className="uppercase tracking-wider">Role Authority: </span>
+            <span className="text-white">{user?.role?.replace('_', ' ').toUpperCase()}</span>
           </div>
         </div>
 
-        {/* Action Toast Alert */}
-        {actionSuccess && (
-          <div className="p-3.5 bg-emerald-950/80 border border-emerald-800/80 rounded-xl text-xs text-emerald-200 flex items-center gap-2 animate-in fade-in">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-            <span>{actionSuccess}</span>
+        <div className="flex flex-1 gap-6 min-h-0">
+          
+          {/* Priority Queue (Left) */}
+          <div className="w-1/3 flex flex-col bg-slate-950 border border-slate-800 rounded">
+            <div className="p-4 border-b border-slate-800 bg-slate-900/50">
+              <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center justify-between">
+                Review Queue
+                <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">{cases.filter(c => !c.acknowledged).length} Pending</span>
+              </h2>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+              {cases.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => { setSelectedCaseId(c.id); setShowTechnical(false); }}
+                  className={`w-full text-left p-4 rounded border transition-colors ${
+                    selectedCaseId === c.id 
+                      ? 'bg-slate-900 border-slate-700' 
+                      : 'bg-transparent border-transparent hover:bg-slate-900/50 hover:border-slate-800'
+                  }`}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-bold text-white">{c.personnelId}</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${getUrgencyColor(c.welfareState)}`}>
+                      {c.welfareState.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-400 font-medium">{c.name}</div>
+                  <div className="text-[11px] text-slate-500 mt-2 flex items-center justify-between">
+                    <span>{c.unit}</span>
+                    {!c.acknowledged && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        )}
 
-        {/* Main Grid: Cases Queue (Left) & Detailed Multi-Stream Review (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Active Cases Triage Queue */}
-          <div className="lg:col-span-4 space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Priority Welfare Queue ({cases.length})
-              </span>
-              <span className="text-[11px] text-slate-500 font-mono">Real-Time</span>
+          {/* Case Details (Right) */}
+          <div className="flex-1 flex flex-col bg-slate-950 border border-slate-800 rounded overflow-y-auto">
+            {/* Case Header */}
+            <div className="p-6 border-b border-slate-800 bg-slate-900">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">{selectedCase.name}</h2>
+                  <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-wider">
+                    {selectedCase.personnelId} • {selectedCase.rank} • {selectedCase.force}
+                  </p>
+                </div>
+                <div className={`px-3 py-1.5 rounded border ${getUrgencyColor(selectedCase.welfareState)} text-xs font-bold uppercase tracking-wider`}>
+                  {selectedCase.welfareState.replace('_', ' ')}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 mt-6">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Assigned Unit</p>
+                  <p className="text-sm font-semibold text-slate-200">{selectedCase.unit}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Current Duty</p>
+                  <p className="text-sm font-semibold text-slate-200">{selectedCase.duty}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Zone & Shift</p>
+                  <p className="text-sm font-semibold text-slate-200">{selectedCase.zone} • {selectedCase.shift}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Status</p>
+                  <p className="text-sm font-semibold text-slate-200">{selectedCase.transitionStatus}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              {cases.map((c) => {
-                const isSelected = selectedCase.id === c.id;
-                return (
-                  <div
-                    key={c.id}
-                    onClick={() => setSelectedCase(c)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-slate-900 border-blue-500 shadow-md shadow-blue-500/10'
-                        : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-white">{c.name}</h4>
-                          <span className="text-[11px] text-slate-400 font-mono">({c.personnelId})</span>
+            <div className="p-6 space-y-8 flex-1">
+              
+              {/* Why This Case Is Relevant */}
+              <section>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 border-b border-slate-800 pb-2">
+                  Physiological Evidence & Relevance
+                </h3>
+                <div className="bg-slate-900/50 p-5 rounded border border-slate-800">
+                  <ul className="space-y-4 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
+                    <li className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full border border-white bg-slate-800 text-slate-300 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                      </div>
+                      <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-slate-950 p-4 rounded border border-slate-800 shadow">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-slate-200 text-xs">Sustained Sleep Debt</span>
                         </div>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {c.rank} • {c.unit} ({c.force})
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Personnel has accumulated {selectedCase.sleepDebtHours} hours of sleep debt over the past 3 days during Night Shift.
                         </p>
                       </div>
-                      <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-blue-400' : 'text-slate-600'}`} />
-                    </div>
+                    </li>
+                    <li className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                      <div className="flex items-center justify-center w-5 h-5 rounded-full border border-white bg-slate-800 text-slate-300 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                      </div>
+                      <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] bg-slate-950 p-4 rounded border border-slate-800 shadow">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-slate-200 text-xs">Resting Heart Rate Elevated</span>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Baseline resting HR has shifted by +{selectedCase.hrShift} bpm above normal, indicating incomplete physiological recovery.
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </section>
 
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                        c.welfareState === 'WELFARE_CHECK' || c.welfareState === 'RED'
-                          ? 'bg-red-950/80 text-red-300 border border-red-800/60'
-                          : c.welfareState === 'AMBER'
-                          ? 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
-                          : 'bg-yellow-950/80 text-yellow-300 border border-yellow-800/60'
-                      }`}>
-                        {c.welfareState.replace('_', ' ')}
-                      </span>
-
-                      <span className="text-[11px] text-slate-400 font-mono">
-                        Score: {(c.compositeScore * 100).toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="mt-2 text-[11px] text-slate-500 truncate">
-                      Context: {c.zone} • {c.shift}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Right Column: Case Deep-Dive & Multi-Stream Breakdown */}
-          <div className="lg:col-span-8 space-y-5">
-            <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-              {/* Personnel Summary Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold text-sm">
-                      {selectedCase.name.split(' ').map((n) => n[0]).join('')}
+              {/* Recommended Response */}
+              <section>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 border-b border-slate-800 pb-2">
+                  Recommended Action
+                </h3>
+                <div className="bg-slate-900 border border-slate-700 p-5 rounded flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-slate-950 border border-slate-800 rounded">
+                      <HeartHandshake className="w-6 h-6 text-blue-400" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        {selectedCase.name}
-                        <span className="text-xs text-slate-400 font-mono font-normal">[{selectedCase.personnelId}]</span>
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        {selectedCase.rank} • {selectedCase.unit} ({selectedCase.force}) • Tanot Forward Sector
-                      </p>
+                      <p className="text-sm font-bold text-white">{selectedCase.recommendedAction}</p>
+                      <p className="text-xs text-slate-400 mt-1">Based on established welfare protocols for sustained strain.</p>
                     </div>
                   </div>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={handleAcknowledge}
+                      disabled={selectedCase.acknowledged}
+                      className="px-4 py-2 bg-slate-200 hover:bg-white text-slate-900 text-xs font-bold uppercase tracking-wider rounded transition disabled:opacity-50"
+                    >
+                      {selectedCase.acknowledged ? 'Acknowledged' : 'Acknowledge Case'}
+                    </button>
+                    <button className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold uppercase tracking-wider rounded border border-slate-700 transition">
+                      Assign Check-in
+                    </button>
+                  </div>
                 </div>
+              </section>
 
-                <div className="text-right flex flex-col sm:items-end gap-1.5">
-                  {getStateBadge(selectedCase.welfareState)}
-                  <span className="text-[11px] text-slate-400">
-                    Evidence Agreement Index: <strong>{(selectedCase.agreementIndex * 100).toFixed(0)}%</strong>
+              {/* Technical Evidence Accordion */}
+              <section className="pt-4">
+                <button
+                  onClick={() => setShowTechnical(!showTechnical)}
+                  className="w-full flex items-center justify-between p-4 bg-slate-900/50 border border-slate-800 rounded text-slate-400 hover:text-white transition"
+                >
+                  <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    <Info className="w-4 h-4" />
+                    Technical Evidence Data
                   </span>
-                </div>
-              </div>
-
-              {/* Authoritative Operational Context Ribbon */}
-              <div className="bg-slate-900/80 border border-slate-800/80 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-blue-400" />
-                    Authoritative Operational Context (Command-Assigned)
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono">Source: Authority Context Engine</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 uppercase">Operational Zone</span>
-                    <p className="font-semibold text-amber-300 mt-0.5">{selectedCase.zone}</p>
-                  </div>
-                  <div className="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 uppercase">Duty & Shift</span>
-                    <p className="font-semibold text-slate-200 mt-0.5">{selectedCase.duty} ({selectedCase.shift})</p>
-                  </div>
-                  <div className="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 uppercase">Deployment</span>
-                    <p className="font-semibold text-purple-300 mt-0.5">Temporary Assignment</p>
-                  </div>
-                  <div className="p-2.5 bg-slate-950/60 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-500 uppercase">Transition State</span>
-                    <p className="font-semibold text-blue-300 mt-0.5">{selectedCase.transitionStatus}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Multi-Stream Evidence Breakdown (Phases 1-8 Convergence) */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    Multimodal Evidence Streams (5 Independent Sources)
-                  </h4>
-                  <span className="text-[11px] text-slate-500 font-mono">Tri-Layer Synthesis</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {/* Stream 1: Wearable Physiological ML */}
-                  <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
-                        <Activity className="w-3.5 h-3.5 text-blue-400" />
-                        1. Physiological ML Core
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/60">
-                        XGBoost (WESAD/PhysioNet)
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-xl font-bold text-white">
-                        {(selectedCase.compositeScore).toFixed(2)}
-                      </span>
-                      <span className="text-xs text-slate-400">P(physio stress probability)</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Kinetic motion disambiguated (ACC energy &lt; 2.0 m/s²). Signal Quality SQI: <strong>0.95 (Good)</strong>.
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showTechnical ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showTechnical && (
+                  <div className="p-5 mt-2 bg-slate-950 border border-slate-800 rounded space-y-4">
+                    <p className="text-xs text-slate-500 italic mb-4">
+                      Raw telemetry inputs provided for auditing purposes. Do not use for clinical diagnosis.
                     </p>
-                  </div>
-
-                  {/* Stream 2: Autonomic Personal Baseline */}
-                  <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
-                        <TrendingDown className="w-3.5 h-3.5 text-amber-400" />
-                        2. Autonomic Personal Baseline
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/60">
-                        Median / MAD Shift
-                      </span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Composite Score</p>
+                        <p className="text-sm font-mono text-slate-300">{selectedCase.compositeScore.toFixed(3)}</p>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">HRV (ms)</p>
+                        <p className="text-sm font-mono text-slate-300">{selectedCase.hrvCurrent}</p>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">HR Shift</p>
+                        <p className="text-sm font-mono text-slate-300">+{selectedCase.hrShift} bpm</p>
+                      </div>
+                      <div className="p-3 bg-slate-900 border border-slate-800 rounded">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Sleep Debt</p>
+                        <p className="text-sm font-mono text-slate-300">{selectedCase.sleepDebtHours} hr</p>
+                      </div>
                     </div>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-xl font-bold text-amber-300">
-                        +{selectedCase.hrShift} bpm
-                      </span>
-                      <span className="text-xs text-slate-400">Resting HR Shift (HRV: {selectedCase.hrvCurrent} ms)</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Autonomic strain z-score: <strong>z = +2.45</strong> (Suppressed autonomic reserve relative to soldier baseline).
-                    </p>
                   </div>
+                )}
+              </section>
 
-                  {/* Stream 3: Multi-Day Recovery Trajectory */}
-                  <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-purple-300 flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-purple-400" />
-                        3. Recovery Debt & Sleep
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-400 border border-purple-800/60">
-                        7-Day Multi-Window
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-xl font-bold text-purple-300">
-                        {selectedCase.sleepDebtHours}h
-                      </span>
-                      <span className="text-xs text-slate-400">Cumulative Sleep Debt (Burden: {selectedCase.recoveryBurdenScore}%)</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Trajectory status: <strong className="text-amber-400">DETERIORATING</strong> across 7 consecutive night rotations.
-                    </p>
-                  </div>
-
-                  {/* Stream 4: Contextual Personnel Graph */}
-                  <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
-                        <Network className="w-3.5 h-3.5 text-emerald-400" />
-                        4. Contextual Graph Cluster
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                        NetworkX Platoon Correlation
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-xl font-bold text-emerald-300">
-                        {selectedCase.graphAffectedCount} Jawans
-                      </span>
-                      <span className="text-xs text-slate-400">Co-occurring in Unit 47</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Cluster ID: <span className="font-mono text-slate-300">{selectedCase.graphClusterId}</span> (Identical night exposure).
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stream 5: Voluntary Voice Acoustic Evidence */}
-                <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Mic className="w-3.5 h-3.5 text-cyan-400" />
-                      <span className="text-xs font-semibold text-cyan-300">5. Voluntary Voice Check-In (Acoustic Pitch & Pause Dynamics)</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60">
-                        Voluntary • In-Memory
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      Acoustic shifts observed: Elevated mean fundamental pitch ($F_0$), increased pause duration ratio. Zero raw audio retained.
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <span className="text-base font-bold text-cyan-300">
-                      {(selectedCase.voiceDeviation * 100).toFixed(0)}%
-                    </span>
-                    <p className="text-[10px] text-slate-500">Acoustic Shift Index</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Non-Punitive Human Welfare Action Recommendation */}
-              <div className="p-4 bg-blue-950/40 border border-blue-800/80 rounded-xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Stethoscope className="w-4 h-4 text-blue-400" />
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Human-in-the-Loop Welfare Recommendation
-                    </h4>
-                  </div>
-                  <span className="text-[10px] text-blue-300 font-mono">Non-Punitive Action Protocol</span>
-                </div>
-                <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                  &ldquo;{selectedCase.recommendedAction}&rdquo;
-                </p>
-
-                {/* Care Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-blue-900/60">
-                  <button
-                    disabled={selectedCase.acknowledged}
-                    onClick={() => handleAcknowledge(selectedCase.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition disabled:opacity-50"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>{selectedCase.acknowledged ? 'Acknowledged' : 'Acknowledge Case'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleAction('Designated Section Peer Welfare Check')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition border border-slate-700"
-                  >
-                    <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Assign Peer Check</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleAction('Medical Officer Tele-Consultation Scheduled')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition border border-slate-700"
-                  >
-                    <Stethoscope className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Request MO Review</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleAction('Rest & Recovery Rotation Scheduled')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition border border-slate-700"
-                  >
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Schedule Recovery Window</span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
