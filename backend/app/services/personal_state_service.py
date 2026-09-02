@@ -187,13 +187,13 @@ class PersonalStateService:
         ).order_by(desc(PhysiologicalRecord.timestamp)).limit(14).all()
 
         current_obs = {
-            "hr": latest_rec.hr if latest_rec else 72.0,
-            "hrv": latest_rec.hrv if latest_rec else 52.0,
-            "resting_hr": latest_rec.resting_hr if latest_rec else 62.0,
-            "sleep": latest_rec.sleep if latest_rec else 7.0,
-            "activity": latest_rec.activity if latest_rec else 6500.0,
-            "motion_context": latest_rec.motion_context if latest_rec else "MODERATE",
-            "sqi_status": latest_rec.sqi_status if latest_rec else "GOOD",
+            "hr": latest_rec.hr if latest_rec and latest_rec.hr is not None else 72.0,
+            "hrv": latest_rec.hrv if latest_rec and latest_rec.hrv is not None else 52.0,
+            "resting_hr": latest_rec.resting_hr if latest_rec and latest_rec.resting_hr is not None else 62.0,
+            "sleep": latest_rec.sleep if latest_rec and latest_rec.sleep is not None else 7.0,
+            "activity": latest_rec.activity if latest_rec and latest_rec.activity is not None else 6500.0,
+            "motion_context": latest_rec.motion_context if latest_rec and latest_rec.motion_context is not None else "MODERATE",
+            "sqi_status": latest_rec.sqi_status if latest_rec and latest_rec.sqi_status is not None else "GOOD",
         }
 
         # 3. Compute Deviations
