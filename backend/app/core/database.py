@@ -29,6 +29,9 @@ else:
             pass
         logger.info("Connected to PostgreSQL database successfully.")
     except Exception as e:
+        if settings.APP_ENV == "production":
+            logger.error(f"FATAL: PostgreSQL connection failed in production ({e}). Crashing container to allow orchestrator restart.")
+            raise e
         logger.warning(f"PostgreSQL connection failed ({e}). Falling back to local SQLite database at {SQLITE_DB_PATH}.")
         sync_db_url = SQLITE_FALLBACK_URL
         engine = create_engine(sync_db_url, connect_args={"check_same_thread": False})
