@@ -98,13 +98,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // If on login page, render children directly without shell
-  if (pathname === '/login') {
+  // If on login or root gateway page, render children directly without shell
+  if (pathname === '/login' || pathname === '/') {
     return <>{children}</>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <div className="h-screen overflow-hidden bg-slate-900 text-slate-100 flex flex-col">
       {/* Top Banner: Synthetic Demonstration Notice */}
       <div className="bg-slate-900 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-xs text-slate-400 z-40 sticky top-0">
         <div className="flex items-center gap-2">
