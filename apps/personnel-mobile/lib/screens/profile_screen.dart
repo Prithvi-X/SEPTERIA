@@ -74,9 +74,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         const Icon(Icons.error_outline, color: Colors.redAccent, size: 40),
                         const SizedBox(height: 12),
-                        Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+                        Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
                         const SizedBox(height: 16),
-                        ElevatedButton(onPressed: _fetchProfile, child: const Text('Retry')),
+                        ElevatedButton(
+                          onPressed: _fetchProfile, 
+                          child: const Text('Retry')
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _handleLogout,
+                          child: const Text('Log Out', style: TextStyle(color: Colors.redAccent)),
+                        ),
                       ],
                     ),
                   ),

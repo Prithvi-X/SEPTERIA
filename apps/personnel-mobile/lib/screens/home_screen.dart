@@ -161,6 +161,20 @@ class _HomeDashboardTabState extends State<_HomeDashboardTab> {
                           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF334155)),
                           child: const Text('Retry Connection', style: TextStyle(color: Colors.white)),
                         ),
+                        if (_errorMessage != null && _errorMessage!.toLowerCase().contains('token')) ...[
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () async {
+                              await ApiService().logout();
+                              if (!mounted) return;
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                (route) => false,
+                              );
+                            },
+                            child: const Text('Log In Again', style: TextStyle(color: Colors.redAccent)),
+                          ),
+                        ],
                       ],
                     ),
                   ),

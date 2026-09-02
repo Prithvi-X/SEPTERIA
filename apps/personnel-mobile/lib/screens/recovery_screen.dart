@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/personnel_models.dart';
+import 'login_screen.dart';
 
 class RecoveryScreen extends StatefulWidget {
   const RecoveryScreen({super.key});
@@ -79,8 +80,22 @@ class _RecoveryScreenState extends State<RecoveryScreen> {
                     children: [
                       const Icon(Icons.cloud_off, color: Color(0xFFEF4444), size: 40),
                       const SizedBox(height: 12),
-                      const Text('Could not load recovery data.', style: TextStyle(color: Color(0xFF94A3B8))),
+                      Text(_errorMessage ?? 'Could not load recovery data.', textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF94A3B8))),
                       TextButton(onPressed: _fetchData, child: const Text('Retry', style: TextStyle(color: Color(0xFF38BDF8)))),
+                      if (_errorMessage != null && _errorMessage!.toLowerCase().contains('token')) ...[
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () async {
+                            await ApiService().logout();
+                            if (!mounted) return;
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                              (route) => false,
+                            );
+                          },
+                          child: const Text('Log In Again', style: TextStyle(color: Colors.redAccent)),
+                        ),
+                      ],
                     ],
                   ),
                 )
