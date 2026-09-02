@@ -6,8 +6,10 @@ build-backend = "setuptools.build_meta"
 name = "septeria-backend"
 version = "0.1.0"
 description = "AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces (SIH26186)"
-readme = "README.md"
 requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
 dependencies = [
     "fastapi>=0.110.0",
     "uvicorn[standard]>=0.28.0",
