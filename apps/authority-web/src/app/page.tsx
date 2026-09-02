@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Shield, Smartphone, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
@@ -34,7 +34,7 @@ export default function GatewayPage() {
           
           {/* Mobile App Card */}
           <a 
-            href="https://prithvi-x.github.io" 
+            href="https://prithvi-x.github.io/SEPTERIA" 
             target="_blank" 
             rel="noopener noreferrer"
             className="group block p-8 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/80 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] transition-all duration-300"
