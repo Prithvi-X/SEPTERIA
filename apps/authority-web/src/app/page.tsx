@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Shield, Smartphone, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ export default function GatewayPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">SEPTERIA Prototype</h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            SIH26186 � AI-Based Predictive Personnel Stress & Welfare Monitoring System
+            SIH26186 • AI-Based Predictive Personnel Stress & Welfare Monitoring System
           </p>
         </div>
 
